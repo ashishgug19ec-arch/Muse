@@ -1,0 +1,46 @@
+{
+  "name": "muse",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^6.12.12",
+    "@ducanh2912/next-pwa": "^10.2.9",
+    "@google/generative-ai": "^0.21.0",
+    "@libsql/client": "^0.14.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "@tiptap/extension-placeholder": "^2.11.5",
+    "@tiptap/react": "^2.11.5",
+    "@tiptap/starter-kit": "^2.11.5",
+    "@uploadthing/react": "^7.3.0",
+    "drizzle-orm": "^0.40.1",
+    "framer-motion": "^12.7.4",
+    "html-to-image": "^1.11.11",
+    "nanoid": "^5.1.5",
+    "next": "15.3.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "satori": "^0.12.1",
+    "uploadthing": "^7.6.0",
+    "workbox-window": "^7.4.0",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.5",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "drizzle-kit": "^0.30.4",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.1",
+    "tailwindcss": "^4.1.5",
+    "typescript": "^5"
+  }
+}

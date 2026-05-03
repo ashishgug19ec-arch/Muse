@@ -1,0 +1,11 @@
+.env*.local
+.next/
+node_modules/
+*.tsbuildinfo
+next-env.d.ts
+drizzle/
+*.db
+*.db-shm
+*.db-wal
+public/sw.js
+public/workbox-*.js
