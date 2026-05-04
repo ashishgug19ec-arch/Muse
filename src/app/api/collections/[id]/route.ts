@@ -15,8 +15,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
     const body = await req.json();
     const allowed = ["name", "description", "season", "coverImageUrl"] as const;
-    const update: Partial<Record<typeof allowed[number], string | null>> & { updatedAt: string } = { updatedAt: new Date().toISOString() };
-    for (const key of allowed) if (body[key] !== undefined) update[key] = body[key] as string | null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const update: any = { updatedAt: new Date().toISOString() };
+    for (const key of allowed) if (body[key] !== undefined) update[key] = body[key];
 
     const updated = await db.update(collections).set(update).where(eq(collections.id, id)).returning();
     return NextResponse.json(updated[0]);
