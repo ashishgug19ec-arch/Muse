@@ -5,28 +5,27 @@ import { MuseLogo } from './ui/MuseLogo';
 import { useMuseStore } from '@/lib/store';
 
 const PAGES = [
-  { section: 'Writing', auth: true, items: [
-    { icon: '✦', label: 'Dashboard',  badge: '3',   auth: true },
-    { icon: '◎', label: 'Sanctuary',  badge: null,  auth: true },
-    { icon: '✐', label: 'New Poem',   badge: null,  auth: true },
+  { section: 'Writing', items: [
+    { icon: '✦', label: 'Dashboard',   badge: '3'  },
+    { icon: '◎', label: 'Sanctuary',   badge: null },
+    { icon: '✐', label: 'New Poem',    badge: null },
   ]},
-  { section: 'My Garden', auth: true, items: [
-    { icon: '⊞', label: 'My Library',    badge: '47', auth: true },
-    { icon: '◈', label: 'Collections',   badge: null, auth: true },
-    { icon: '✦', label: 'Scraps',        badge: '12', auth: true },
-    { icon: '◉', label: 'Ikigai Journal',badge: null, auth: true },
+  { section: 'My Garden', items: [
+    { icon: '⊞', label: 'My Library',     badge: '47' },
+    { icon: '◈', label: 'Collections',    badge: null },
+    { icon: '✦', label: 'Scraps',         badge: '12' },
+    { icon: '◉', label: 'Ikigai Journal', badge: null },
   ]},
-  { section: 'Discover', auth: false, items: [
-    { icon: '◎', label: 'Explore',      badge: null,  auth: false },
-    { icon: '⊞', label: 'Fan Fiction',  badge: 'new', auth: false },
-    { icon: '◎', label: 'Story Reader', badge: null,  auth: false },
-    { icon: '✐', label: 'Story Upload', badge: null,  auth: true  },
+  { section: 'Discover', items: [
+    { icon: '◎', label: 'Explore',       badge: null  },
+    { icon: '⊞', label: 'Fan Fiction',   badge: 'new' },
+    { icon: '◎', label: 'Story Reader',  badge: null  },
+    { icon: '✐', label: 'Story Upload',  badge: null  },
   ]},
-  { section: 'Account', auth: false, items: [
-    { icon: '◉', label: 'Author Profile', badge: null, auth: true  },
-    { icon: '◈', label: 'Notifications',  badge: '5',  auth: true  },
-    { icon: '⊟', label: 'Settings',       badge: null, auth: true  },
-    { icon: '✦', label: 'Pricing',        badge: null, auth: false },
+  { section: 'Account', items: [
+    { icon: '◉', label: 'Author Profile', badge: null },
+    { icon: '◈', label: 'Notifications',  badge: '5'  },
+    { icon: '⊟', label: 'Settings',       badge: null },
   ]},
 ];
 
@@ -51,15 +50,7 @@ export function Drawer() {
   const iconCol    = n ? 'rgba(200,160,255,.7)'     : '#8a7aa0';
   const hoverBg    = n ? 'rgba(160,124,200,.15)'    : 'rgba(208,191,240,.28)';
 
-  const visiblePages = PAGES
-    .map(section => ({
-      ...section,
-      items: section.items.filter(item => !item.auth || isSignedIn),
-    }))
-    .filter(section => {
-      if (section.auth && !isSignedIn) return false;
-      return section.items.length > 0;
-    });
+  const visiblePages = isSignedIn ? PAGES : [];
 
   return (
     <>
