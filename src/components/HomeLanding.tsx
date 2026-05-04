@@ -1,5 +1,6 @@
 'use client';
-import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { Nav } from '@/components/Nav';
 import { Drawer } from '@/components/Drawer';
@@ -83,6 +84,15 @@ export default function HomeLanding() {
   const { openPage, night } = useMuseStore();
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const page = searchParams.get('page');
+    if (page && isLoaded && isSignedIn) {
+      openPage(page);
+      router.replace('/');
+    }
+  }, [isLoaded, isSignedIn, searchParams]);
 
   function handleBeginWriting() {
     if (!isLoaded) return;
