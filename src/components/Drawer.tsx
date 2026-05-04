@@ -1,6 +1,10 @@
 'use client';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 import { MuseLogo } from './ui/MuseLogo';
 import { useMuseStore } from '@/lib/store';
+
+const PUBLIC_PAGES = new Set(['explore', 'fan fiction', 'story reader', 'pricing']);
 
 const PAGES = [
   { section: 'Writing', items: [
@@ -30,7 +34,20 @@ const PAGES = [
 
 export function Drawer() {
   const { drawerOpen, night, setDrawerOpen, openPage } = useMuseStore();
+  const { isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
   const n = night;
+
+  function handleNav(label: string) {
+    setDrawerOpen(false);
+    if (!isLoaded) return;
+    const key = label.toLowerCase();
+    if (!isSignedIn && !PUBLIC_PAGES.has(key)) {
+      router.push('/sign-in');
+      return;
+    }
+    openPage(label);
+  }
 
   const overlayBg = n ? 'rgba(10,4,20,.6)' : 'rgba(60,30,80,.18)';
   const panelBg = n ? 'rgba(22,14,40,.96)' : 'rgba(250,247,255,.96)';
@@ -117,7 +134,7 @@ export function Drawer() {
             <div key={section.section} style={{ marginBottom: 18 }}>
               <div style={{ fontSize: 9, fontWeight: 400, letterSpacing: '.1em', textTransform: 'uppercase', color: sectionCol, padding: '0 8px', marginBottom: 4 }}>{section.section}</div>
               {section.items.map(item => (
-                <button key={item.label} onClick={() => openPage(item.label)} style={{
+                <button key={item.label} onClick={() => handleNav(item.label)} style={{
                   width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                   padding: '9px 12px', borderRadius: 12,
                   border: 'none', background: 'transparent', cursor: 'pointer',
@@ -149,14 +166,14 @@ export function Drawer() {
           borderTop: `1px solid ${borderCol}`,
           display: 'flex', flexDirection: 'column', gap: 8,
         }}>
-          <button onClick={() => openPage('Sanctuary')} style={{
+          <button onClick={() => handleNav('Sanctuary')} style={{
             padding: '12px', borderRadius: 50, border: 'none',
             background: 'linear-gradient(135deg,#c084fc,#9b72cf,#7c3aed)', color: '#fff',
             fontSize: 13, fontWeight: 400, cursor: 'pointer',
             fontFamily: "'Playfair Display',serif", letterSpacing: '.05em',
             boxShadow: '0 6px 24px rgba(124,58,237,.32)',
           }}>Open Sanctuary</button>
-          <button onClick={() => openPage('New Poem')} style={{
+          <button onClick={() => handleNav('New Poem')} style={{
             padding: '12px', borderRadius: 50,
             border: `1.5px solid rgba(208,191,240,.52)`,
             background: n ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.65)',

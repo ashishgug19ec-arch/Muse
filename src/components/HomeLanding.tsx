@@ -1,4 +1,6 @@
 'use client';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 import { Nav } from '@/components/Nav';
 import { Drawer } from '@/components/Drawer';
 import { AppOverlay } from '@/components/AppOverlay';
@@ -78,7 +80,15 @@ const testimonials = [
 ];
 
 export default function HomeLanding() {
-  const { openPage, night, toggleNight } = useMuseStore();
+  const { openPage, night } = useMuseStore();
+  const { isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
+
+  function handleBeginWriting() {
+    if (!isLoaded) return;
+    if (isSignedIn) openPage('sanctuary');
+    else router.push('/sign-up');
+  }
 
   const ink  = night ? 'rgba(230,220,255,.9)'  : '#1e1628';
   const ink2 = night ? 'rgba(200,180,255,.7)'  : '#4a3960';
@@ -114,7 +124,7 @@ export default function HomeLanding() {
 
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'center' }}>
           <button
-            onClick={() => openPage('sanctuary')}
+            onClick={handleBeginWriting}
             style={{
               padding: '15px 36px', borderRadius: 50, border: 'none',
               background: 'linear-gradient(135deg,#c084fc,#9b72cf,#7c3aed)',
@@ -275,7 +285,7 @@ export default function HomeLanding() {
         </p>
         <div style={{ display: 'flex', gap: 14, justifyContent: 'center' }}>
           <button
-            onClick={() => openPage('sanctuary')}
+            onClick={handleBeginWriting}
             style={{
               padding: '16px 44px', borderRadius: 50, border: 'none',
               background: 'linear-gradient(135deg,#c084fc,#9b72cf,#7c3aed)',
