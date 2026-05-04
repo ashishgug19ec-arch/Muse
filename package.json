@@ -11,7 +11,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.12.12",
+    "@clerk/nextjs": "^7.3.0",
     "@ducanh2912/next-pwa": "^10.2.9",
     "@google/generative-ai": "^0.21.0",
     "@libsql/client": "^0.14.0",
