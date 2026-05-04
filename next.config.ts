@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 import withPWA from "@ducanh2912/next-pwa";
 
 const nextConfig: NextConfig = {
-  eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: false },
+  turbopack: {},
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "utfs.io" },
