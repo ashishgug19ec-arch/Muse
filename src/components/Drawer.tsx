@@ -4,64 +4,66 @@ import { useUser } from '@clerk/nextjs';
 import { MuseLogo } from './ui/MuseLogo';
 import { useMuseStore } from '@/lib/store';
 
-const PUBLIC_PAGES = new Set(['explore', 'fan fiction', 'story reader', 'pricing']);
-
 const PAGES = [
-  { section: 'Writing', items: [
-    { icon: '✦', label: 'Dashboard', badge: '3' },
-    { icon: '◎', label: 'Sanctuary', badge: null },
-    { icon: '✐', label: 'New Poem', badge: null },
+  { section: 'Writing', auth: true, items: [
+    { icon: '✦', label: 'Dashboard',  badge: '3',   auth: true },
+    { icon: '◎', label: 'Sanctuary',  badge: null,  auth: true },
+    { icon: '✐', label: 'New Poem',   badge: null,  auth: true },
   ]},
-  { section: 'My Garden', items: [
-    { icon: '⊞', label: 'My Library', badge: '47' },
-    { icon: '◈', label: 'Collections', badge: null },
-    { icon: '✦', label: 'Scraps', badge: '12' },
-    { icon: '◉', label: 'Ikigai Journal', badge: null },
+  { section: 'My Garden', auth: true, items: [
+    { icon: '⊞', label: 'My Library',    badge: '47', auth: true },
+    { icon: '◈', label: 'Collections',   badge: null, auth: true },
+    { icon: '✦', label: 'Scraps',        badge: '12', auth: true },
+    { icon: '◉', label: 'Ikigai Journal',badge: null, auth: true },
   ]},
-  { section: 'Discover', items: [
-    { icon: '◎', label: 'Explore', badge: null },
-    { icon: '⊞', label: 'Fan Fiction', badge: 'new' },
-    { icon: '◎', label: 'Story Reader', badge: null },
-    { icon: '✐', label: 'Story Upload', badge: null },
+  { section: 'Discover', auth: false, items: [
+    { icon: '◎', label: 'Explore',      badge: null,  auth: false },
+    { icon: '⊞', label: 'Fan Fiction',  badge: 'new', auth: false },
+    { icon: '◎', label: 'Story Reader', badge: null,  auth: false },
+    { icon: '✐', label: 'Story Upload', badge: null,  auth: true  },
   ]},
-  { section: 'Account', items: [
-    { icon: '◉', label: 'Author Profile', badge: null },
-    { icon: '◈', label: 'Notifications', badge: '5' },
-    { icon: '⊟', label: 'Settings', badge: null },
-    { icon: '✦', label: 'Pricing', badge: null },
+  { section: 'Account', auth: false, items: [
+    { icon: '◉', label: 'Author Profile', badge: null, auth: true  },
+    { icon: '◈', label: 'Notifications',  badge: '5',  auth: true  },
+    { icon: '⊟', label: 'Settings',       badge: null, auth: true  },
+    { icon: '✦', label: 'Pricing',        badge: null, auth: false },
   ]},
 ];
 
 export function Drawer() {
   const { drawerOpen, night, setDrawerOpen, openPage } = useMuseStore();
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
   const router = useRouter();
   const n = night;
 
   function handleNav(label: string) {
     setDrawerOpen(false);
-    if (!isLoaded) return;
-    const key = label.toLowerCase();
-    if (!isSignedIn && !PUBLIC_PAGES.has(key)) {
-      router.push('/sign-in');
-      return;
-    }
     openPage(label);
   }
 
-  const overlayBg = n ? 'rgba(10,4,20,.6)' : 'rgba(60,30,80,.18)';
-  const panelBg = n ? 'rgba(22,14,40,.96)' : 'rgba(250,247,255,.96)';
-  const borderCol = n ? 'rgba(160,124,200,.22)' : 'rgba(208,191,240,.48)';
-  const nameCol = n ? 'rgba(240,230,255,.9)' : '#1e1628';
-  const taglineCol = n ? 'rgba(200,170,255,.5)' : '#bbadd0';
-  const sectionCol = n ? 'rgba(200,170,255,.4)' : '#bbadd0';
-  const labelCol = n ? 'rgba(230,220,255,.85)' : '#4a3960';
-  const iconCol = n ? 'rgba(200,160,255,.7)' : '#8a7aa0';
-  const hoverBg = n ? 'rgba(160,124,200,.15)' : 'rgba(208,191,240,.28)';
+  const overlayBg  = n ? 'rgba(10,4,20,.6)'        : 'rgba(60,30,80,.18)';
+  const panelBg    = n ? 'rgba(22,14,40,.96)'       : 'rgba(250,247,255,.96)';
+  const borderCol  = n ? 'rgba(160,124,200,.22)'    : 'rgba(208,191,240,.48)';
+  const nameCol    = n ? 'rgba(240,230,255,.9)'     : '#1e1628';
+  const taglineCol = n ? 'rgba(200,170,255,.5)'     : '#bbadd0';
+  const sectionCol = n ? 'rgba(200,170,255,.4)'     : '#bbadd0';
+  const labelCol   = n ? 'rgba(230,220,255,.85)'    : '#4a3960';
+  const iconCol    = n ? 'rgba(200,160,255,.7)'     : '#8a7aa0';
+  const hoverBg    = n ? 'rgba(160,124,200,.15)'    : 'rgba(208,191,240,.28)';
+
+  const visiblePages = PAGES
+    .map(section => ({
+      ...section,
+      items: section.items.filter(item => !item.auth || isSignedIn),
+    }))
+    .filter(section => {
+      if (section.auth && !isSignedIn) return false;
+      return section.items.length > 0;
+    });
 
   return (
     <>
-      {/* Overlay */}
+      {/* Backdrop */}
       <div onClick={() => setDrawerOpen(false)} style={{
         position: 'fixed', inset: 0, zIndex: 199,
         background: drawerOpen ? overlayBg : 'transparent',
@@ -104,35 +106,64 @@ export function Drawer() {
           }}>✕</button>
         </div>
 
-        {/* User chip */}
-        <div style={{
-          margin: '14px 18px',
-          padding: '12px 16px',
-          borderRadius: 16,
-          border: `1px solid ${n ? 'rgba(160,124,200,.22)' : 'rgba(208,191,240,.38)'}`,
-          background: n ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.58)',
-          display: 'flex', alignItems: 'center', gap: 12,
-        }}>
-          <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-            <defs><radialGradient id="dav"><stop stopColor="#f0a8c0"/><stop offset="1" stopColor="#c070a0"/></radialGradient></defs>
-            <circle cx="19" cy="19" r="19" fill="url(#dav)"/>
-            <circle cx="19" cy="15" r="7" fill="rgba(255,255,255,.55)"/>
-            <ellipse cx="19" cy="30" rx="12" ry="7.5" fill="rgba(255,255,255,.42)"/>
-          </svg>
-          <div>
-            <div style={{ fontSize: 13, color: nameCol, fontWeight: 400 }}>Sakura Writer</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-              <span style={{ fontSize: 10, color: n ? 'rgba(200,170,255,.6)' : '#8a7aa0', fontWeight: 300 }}>Pro · Blossom</span>
-              <span style={{ fontSize: 9, color: '#d06888', fontWeight: 400, background: 'rgba(240,168,192,.2)', padding: '1px 7px', borderRadius: 50, border: '1px solid rgba(240,168,192,.35)' }}>🔥 12 days</span>
+        {/* User chip — signed in */}
+        {isLoaded && isSignedIn && (
+          <div style={{
+            margin: '14px 18px', padding: '12px 16px', borderRadius: 16,
+            border: `1px solid ${n ? 'rgba(160,124,200,.22)' : 'rgba(208,191,240,.38)'}`,
+            background: n ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.58)',
+            display: 'flex', alignItems: 'center', gap: 12,
+          }}>
+            <div style={{
+              width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
+              background: 'linear-gradient(135deg,#c084fc,#7c3aed)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 16, color: '#fff', fontWeight: 600,
+            }}>
+              {user?.firstName?.[0] ?? user?.emailAddresses?.[0]?.emailAddress?.[0]?.toUpperCase() ?? '🌸'}
+            </div>
+            <div>
+              <div style={{ fontSize: 13, color: nameCol, fontWeight: 400 }}>
+                {user?.firstName ? `${user.firstName}${user.lastName ? ' ' + user.lastName : ''}` : 'My garden'}
+              </div>
+              <div style={{ fontSize: 10, color: n ? 'rgba(200,170,255,.6)' : '#8a7aa0', fontWeight: 300, marginTop: 2 }}>
+                {user?.emailAddresses?.[0]?.emailAddress}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Nav sections */}
+        {/* Sign-in prompt — signed out */}
+        {isLoaded && !isSignedIn && (
+          <div style={{
+            margin: '14px 18px', padding: '14px 16px', borderRadius: 16,
+            border: `1px solid ${n ? 'rgba(160,124,200,.22)' : 'rgba(208,191,240,.38)'}`,
+            background: n ? 'rgba(255,255,255,.04)' : 'rgba(255,255,255,.55)',
+          }}>
+            <div style={{ fontSize: 12, color: nameCol, fontWeight: 400, marginBottom: 4 }}>Not signed in</div>
+            <div style={{ fontSize: 11, color: taglineCol, fontWeight: 300, marginBottom: 12 }}>Sign in to access your garden</div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => { setDrawerOpen(false); router.push('/sign-in'); }} style={{
+                flex: 1, padding: '8px', borderRadius: 50,
+                border: `1px solid ${borderCol}`, background: 'transparent',
+                color: '#c084fc', fontSize: 11, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif",
+              }}>Sign in</button>
+              <button onClick={() => { setDrawerOpen(false); router.push('/sign-up'); }} style={{
+                flex: 1, padding: '8px', borderRadius: 50, border: 'none',
+                background: 'linear-gradient(135deg,#c084fc,#7c3aed)',
+                color: '#fff', fontSize: 11, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif",
+              }}>Join Muse</button>
+            </div>
+          </div>
+        )}
+
+        {/* Nav sections — filtered by auth */}
         <div style={{ flex: 1, padding: '0 12px' }}>
-          {PAGES.map(section => (
+          {visiblePages.map(section => (
             <div key={section.section} style={{ marginBottom: 18 }}>
-              <div style={{ fontSize: 9, fontWeight: 400, letterSpacing: '.1em', textTransform: 'uppercase', color: sectionCol, padding: '0 8px', marginBottom: 4 }}>{section.section}</div>
+              <div style={{ fontSize: 9, fontWeight: 400, letterSpacing: '.1em', textTransform: 'uppercase', color: sectionCol, padding: '0 8px', marginBottom: 4 }}>
+                {section.section}
+              </div>
               {section.items.map(item => (
                 <button key={item.label} onClick={() => handleNav(item.label)} style={{
                   width: '100%', display: 'flex', alignItems: 'center', gap: 10,
@@ -166,20 +197,32 @@ export function Drawer() {
           borderTop: `1px solid ${borderCol}`,
           display: 'flex', flexDirection: 'column', gap: 8,
         }}>
-          <button onClick={() => handleNav('Sanctuary')} style={{
-            padding: '12px', borderRadius: 50, border: 'none',
-            background: 'linear-gradient(135deg,#c084fc,#9b72cf,#7c3aed)', color: '#fff',
-            fontSize: 13, fontWeight: 400, cursor: 'pointer',
-            fontFamily: "'Playfair Display',serif", letterSpacing: '.05em',
-            boxShadow: '0 6px 24px rgba(124,58,237,.32)',
-          }}>Open Sanctuary</button>
-          <button onClick={() => handleNav('New Poem')} style={{
-            padding: '12px', borderRadius: 50,
-            border: `1.5px solid rgba(208,191,240,.52)`,
-            background: n ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.65)',
-            color: '#c084fc', fontSize: 13, fontWeight: 400, cursor: 'pointer',
-            fontFamily: "'DM Sans',sans-serif", letterSpacing: '.02em',
-          }}>+ New Poem</button>
+          {isSignedIn ? (
+            <>
+              <button onClick={() => handleNav('Sanctuary')} style={{
+                padding: '12px', borderRadius: 50, border: 'none',
+                background: 'linear-gradient(135deg,#c084fc,#9b72cf,#7c3aed)', color: '#fff',
+                fontSize: 13, cursor: 'pointer',
+                fontFamily: "'Playfair Display',serif", letterSpacing: '.05em',
+                boxShadow: '0 6px 24px rgba(124,58,237,.32)',
+              }}>Open Sanctuary</button>
+              <button onClick={() => handleNav('New Poem')} style={{
+                padding: '12px', borderRadius: 50,
+                border: `1.5px solid rgba(208,191,240,.52)`,
+                background: n ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.65)',
+                color: '#c084fc', fontSize: 13, cursor: 'pointer',
+                fontFamily: "'DM Sans',sans-serif", letterSpacing: '.02em',
+              }}>+ New Poem</button>
+            </>
+          ) : (
+            <button onClick={() => { setDrawerOpen(false); router.push('/sign-up'); }} style={{
+              padding: '12px', borderRadius: 50, border: 'none',
+              background: 'linear-gradient(135deg,#c084fc,#9b72cf,#7c3aed)', color: '#fff',
+              fontSize: 13, cursor: 'pointer',
+              fontFamily: "'Playfair Display',serif", letterSpacing: '.05em',
+              boxShadow: '0 6px 24px rgba(124,58,237,.32)',
+            }}>Join Muse — it&apos;s free</button>
+          )}
         </div>
       </div>
     </>
