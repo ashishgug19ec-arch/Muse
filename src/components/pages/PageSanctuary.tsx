@@ -4,11 +4,43 @@ import { useState } from 'react';
 interface Props { night: boolean; }
 
 export function PageSanctuary({ night }: Props) {
-  const [text, setText] = useState('Between two words\nsilence blooms like peonies—\nyou are the garden');
-  const [title, setTitle] = useState('Untitled poem');
+  const [text, setText] = useState('');
+  const [title, setTitle] = useState('');
   const [mood, setMood] = useState('Reflective');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
   const n = night;
   const moods = ['Reflective', 'Melancholic', 'Peaceful', 'Hopeful'];
+
+  async function handleSave() {
+    if (!title.trim() || !text.trim()) {
+      setError('Please add a title and some words before saving.');
+      return;
+    }
+    setSaving(true); setError(''); setSaved(false);
+    try {
+      const res = await fetch('/api/poems', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title.trim(), body: text.trim(), mood, visibility: 'public' }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        setError(d.error ?? 'Failed to save.');
+      } else {
+        setSaved(true);
+        setTitle('');
+        setText('');
+        setMood('Reflective');
+        setTimeout(() => setSaved(false), 3000);
+      }
+    } catch {
+      setError('Network error. Try again.');
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div style={{
@@ -30,23 +62,33 @@ export function PageSanctuary({ night }: Props) {
       </div>
 
       {/* Title */}
-      <input value={title} onChange={e => setTitle(e.target.value)} style={{
-        fontFamily: "'Playfair Display',serif", fontSize: 32, fontWeight: 300,
-        color: n ? 'rgba(240,228,255,.88)' : '#1e1628',
-        background: 'transparent', border: 'none', outline: 'none',
-        letterSpacing: '-.03em', marginBottom: 32,
-        borderBottom: `1px solid ${n ? 'rgba(160,124,200,.2)' : 'rgba(208,191,240,.4)'}`,
-        paddingBottom: 12, width: '100%',
-      }} />
+      <input
+        value={title}
+        onChange={e => setTitle(e.target.value)}
+        placeholder="Untitled poem"
+        style={{
+          fontFamily: "'Playfair Display',serif", fontSize: 32, fontWeight: 300,
+          color: n ? 'rgba(240,228,255,.88)' : '#1e1628',
+          background: 'transparent', border: 'none', outline: 'none',
+          letterSpacing: '-.03em', marginBottom: 32,
+          borderBottom: `1px solid ${n ? 'rgba(160,124,200,.2)' : 'rgba(208,191,240,.4)'}`,
+          paddingBottom: 12, width: '100%',
+        }}
+      />
 
       {/* Poem body */}
-      <textarea value={text} onChange={e => setText(e.target.value)} style={{
-        flex: 1, fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 300,
-        fontStyle: 'italic', lineHeight: 2.1,
-        color: n ? 'rgba(230,215,255,.85)' : '#4a3960',
-        background: 'transparent', border: 'none', outline: 'none', resize: 'none',
-        minHeight: 200,
-      }} />
+      <textarea
+        value={text}
+        onChange={e => setText(e.target.value)}
+        placeholder="Begin writing…"
+        style={{
+          flex: 1, fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 300,
+          fontStyle: 'italic', lineHeight: 2.1,
+          color: n ? 'rgba(230,215,255,.85)' : '#4a3960',
+          background: 'transparent', border: 'none', outline: 'none', resize: 'none',
+          minHeight: 200,
+        }}
+      />
 
       {/* Bottom bar */}
       <div style={{
@@ -56,24 +98,27 @@ export function PageSanctuary({ night }: Props) {
         marginTop: 20,
       }}>
         <div style={{ fontSize: 11, color: n ? 'rgba(160,140,200,.5)' : '#bbadd0', fontWeight: 300, letterSpacing: '.06em' }}>
-          {text.split(/\s+/).filter(Boolean).length} words · autosaved
+          {text.split(/\s+/).filter(Boolean).length} words
+          {error && <span style={{ color: '#e05080', marginLeft: 12 }}>{error}</span>}
+          {saved && <span style={{ color: '#7c3aed', marginLeft: 12 }}>Published ✓</span>}
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
           {['Haiku', 'Free verse', 'Sonnet'].map(f => (
             <span key={f} style={{
               fontSize: 10, padding: '3px 12px', borderRadius: 50,
               border: `1px solid ${n ? 'rgba(160,124,200,.25)' : 'rgba(208,191,240,.52)'}`,
-              color: n ? 'rgba(200,170,255,.6)' : '#8a7aa0', cursor: 'pointer',
+              color: n ? 'rgba(200,170,255,.6)' : '#8a7aa0',
             }}>{f}</span>
           ))}
         </div>
-        <button style={{
+        <button onClick={handleSave} disabled={saving} style={{
           padding: '10px 28px', borderRadius: 50, border: 'none',
-          background: 'linear-gradient(135deg,#c084fc,#9b72cf,#7c3aed)',
-          color: '#fff', fontSize: 13, cursor: 'pointer',
+          background: saving ? 'rgba(124,58,237,.4)' : 'linear-gradient(135deg,#c084fc,#9b72cf,#7c3aed)',
+          color: '#fff', fontSize: 13, cursor: saving ? 'not-allowed' : 'pointer',
           fontFamily: "'Playfair Display',serif", letterSpacing: '.05em',
-          boxShadow: '0 6px 24px rgba(124,58,237,.3)',
-        }}>Save poem</button>
+          boxShadow: saving ? 'none' : '0 6px 24px rgba(124,58,237,.3)',
+          transition: 'all .2s',
+        }}>{saving ? 'Saving…' : 'Publish poem'}</button>
       </div>
     </div>
   );
