@@ -96,7 +96,7 @@ export default function HomeLanding() {
 
   function handleBeginWriting() {
     if (!isLoaded) return;
-    if (isSignedIn) openPage('sanctuary');
+    if (isSignedIn) openPage('write');
     else router.push('/sign-up');
   }
 

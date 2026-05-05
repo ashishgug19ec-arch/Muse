@@ -2,6 +2,7 @@
 import { useMuseStore } from '@/lib/store';
 import { MuseLogo } from './ui/MuseLogo';
 import { PageDashboard } from './pages/PageDashboard';
+import { PageBeginWriting } from './pages/PageBeginWriting';
 import { PageSanctuary } from './pages/PageSanctuary';
 import { PageLibrary } from './pages/PageLibrary';
 import { PageCollections } from './pages/PageCollections';
@@ -13,6 +14,8 @@ import { PageSettings } from './pages/PageSettings';
 
 const PAGE_MAP: Record<string, React.ComponentType<{ night: boolean }>> = {
   dashboard: PageDashboard,
+  write: PageBeginWriting,
+  'begin writing': PageBeginWriting,
   sanctuary: PageSanctuary,
   poems: PageLibrary,
   library: PageLibrary,

@@ -135,7 +135,7 @@ export function Drawer() {
         {/* Footer */}
         <div style={{ padding: '16px 18px 24px', borderTop: `1px solid ${borderCol}` }}>
           {isSignedIn ? (
-            <button onClick={() => { setDrawerOpen(false); openPage('Sanctuary'); }} style={{
+            <button onClick={() => { setDrawerOpen(false); openPage('write'); }} style={{
               width: '100%', padding: '12px', borderRadius: 50, border: 'none',
               background: 'linear-gradient(135deg,#c084fc,#9b72cf,#7c3aed)', color: '#fff',
               fontSize: 13, cursor: 'pointer',
