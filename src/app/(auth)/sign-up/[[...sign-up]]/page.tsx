@@ -59,10 +59,11 @@ export default function SignUpPage() {
       <style>{`::placeholder { color: rgba(140,100,180,.45) !important; }`}</style>
 
       <div style={{
-        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: "'DM Sans', sans-serif", padding: '24px', position: 'relative', overflow: 'hidden',
+        minHeight: '100vh', display: 'flex', flexDirection: 'column',
+        fontFamily: "'DM Sans', sans-serif", position: 'relative', overflow: 'hidden',
         background: 'linear-gradient(160deg, #f5eeff 0%, #ede0ff 30%, #e8d5f5 55%, #f0e8ff 80%, #fdf5ff 100%)',
       }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
 
         {/* Background */}
         <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none' }}>
@@ -205,7 +206,30 @@ export default function SignUpPage() {
             <Link href="/sign-in" style={{ color: '#7c3aed', fontWeight: 500, textDecoration: 'none' }}>Sign in</Link>
           </p>
         </div>
-      </div>
+      </div></div>
+
+      <footer style={{
+        position: 'relative', zIndex: 10,
+        padding: '20px 40px',
+        borderTop: '1px solid rgba(190,160,230,.2)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
+        background: 'rgba(255,252,255,.4)', backdropFilter: 'blur(20px)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, color: '#2d1a4a', fontWeight: 400 }}>Muse</span>
+          <span style={{ fontSize: 11, color: '#8a7aa0', fontWeight: 300 }}>garden of poetry</span>
+        </div>
+        <div style={{ display: 'flex', gap: 20 }}>
+          {[
+            { label: 'Home', href: '/' },
+            { label: 'Sign In', href: '/sign-in' },
+          ].map(l => (
+            <Link key={l.label} href={l.href} style={{ fontSize: 11, color: '#8a7aa0', textDecoration: 'none', fontFamily: "'DM Sans',sans-serif", fontWeight: 300 }}>{l.label}</Link>
+          ))}
+        </div>
+        <div style={{ fontSize: 11, color: '#8a7aa0', fontWeight: 300 }}>© {new Date().getFullYear()} Muse · All rights reserved</div>
+      </footer>
+    </div>
     </>
   );
 }
