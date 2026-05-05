@@ -53,10 +53,10 @@ export function PageDashboard({ night }: Props) {
   }, []);
 
   const statCards = [
-    { label: 'Poems',       val: data ? fmt(data.totalPoems)       : '—', color: '#c084fc' },
-    { label: 'Fan Fics',    val: data ? fmt(data.totalFanfics)     : '—', color: '#f472b6' },
-    { label: 'Collections', val: data ? fmt(data.totalCollections) : '—', color: '#90c8a8' },
-    { label: 'Day Streak',  val: data ? `${data.currentStreak}d`   : '—', color: '#f0a8c0' },
+    { label: 'Poems',       val: data ? fmt(data.totalPoems)       : '—', color: '#c084fc', page: 'Poems' },
+    { label: 'Fan Fics',    val: data ? fmt(data.totalFanfics)     : '—', color: '#f472b6', page: 'Fan Fiction' },
+    { label: 'Collections', val: data ? fmt(data.totalCollections) : '—', color: '#90c8a8', page: 'Collections' },
+    { label: 'Day Streak',  val: data ? `${data.currentStreak}d`   : '—', color: '#f0a8c0', page: null },
   ];
 
   const weekActivity = data?.weekActivity ?? [];
@@ -80,7 +80,7 @@ export function PageDashboard({ night }: Props) {
       {/* Stat cards: Poems | Fan Fics | Collections | Streak */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 20 }}>
         {statCards.map(s => (
-          <Tilt key={s.label} style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '20px 22px' }}>
+          <Tilt key={s.label} onClick={s.page ? () => onNav(s.page!) : undefined} style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '20px 22px', cursor: s.page ? 'pointer' : 'default' }}>
             <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 38, fontWeight: 300, color: ink, letterSpacing: '-.04em', lineHeight: 1 }}>{s.val}</div>
             <div style={{ fontSize: 11, color: ink3, fontWeight: 300, marginTop: 8, letterSpacing: '.06em' }}>{s.label}</div>
             <div style={{ height: 3, borderRadius: 50, background: `linear-gradient(90deg,${s.color},transparent)`, marginTop: 10, opacity: .6 }} />
@@ -111,10 +111,10 @@ export function PageDashboard({ night }: Props) {
 
       {/* Recent Poems + Recent Fan Fics */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-        <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 24px' }}>
+        <div onClick={() => onNav('Poems')} style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 24px', cursor: 'pointer' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3 }}>Recent Poems</div>
-            <button onClick={() => onNav('Poems')} style={{ fontSize: 10, color: '#c084fc', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>View all →</button>
+            <span style={{ fontSize: 10, color: '#c084fc' }}>View all →</span>
           </div>
           {data === null ? (
             <div style={{ fontSize: 13, color: ink3, fontStyle: 'italic' }}>Loading…</div>
@@ -131,10 +131,10 @@ export function PageDashboard({ night }: Props) {
           ))}
         </div>
 
-        <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 24px' }}>
+        <div onClick={() => onNav('Fan Fiction')} style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 24px', cursor: 'pointer' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3 }}>Recent Fan Fics</div>
-            <button onClick={() => onNav('Fan Fiction')} style={{ fontSize: 10, color: '#f472b6', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>View all →</button>
+            <span style={{ fontSize: 10, color: '#f472b6' }}>View all →</span>
           </div>
           {data === null ? (
             <div style={{ fontSize: 13, color: ink3, fontStyle: 'italic' }}>Loading…</div>
