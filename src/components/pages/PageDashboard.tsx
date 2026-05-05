@@ -11,8 +11,11 @@ interface DashboardData {
   totalFanfics: number;
   totalCollections: number;
   currentStreak: number;
+  monthDays: number;
+  yearDays: number;
   recentPoems: { id: string; title: string; createdAt: string }[];
-  weekActivity: { label: string; count: number }[];
+  recentFanfics: { id: string; title: string; fandom: string | null; status: string; chapterCount: number; createdAt: string }[];
+  weekActivity: { label: string; count: number; future: boolean }[];
   dailyPrompt: string;
 }
 
@@ -47,17 +50,19 @@ export function PageDashboard({ night }: Props) {
   }, []);
 
   const statCards = [
-    { label: 'Poems',       val: data ? fmt(data.totalPoems)      : '—', color: '#c084fc' },
-    { label: 'Fan Fics',    val: data ? fmt(data.totalFanfics)    : '—', color: '#f472b6' },
-    { label: 'Collections', val: data ? fmt(data.totalCollections) : '—', color: '#90b898' },
-    { label: 'Streak',      val: data ? `${data.currentStreak}d`  : '—', color: '#f0a8c0' },
+    { label: 'Poems',      val: data ? fmt(data.totalPoems)   : '—', color: '#c084fc', sub: 'total' },
+    { label: 'Fan Fics',   val: data ? fmt(data.totalFanfics) : '—', color: '#f472b6', sub: 'total' },
+    { label: 'This Month', val: data ? `${data.monthDays}d`   : '—', color: '#90c8a8', sub: 'days written' },
+    { label: 'This Year',  val: data ? `${data.yearDays}d`    : '—', color: '#f0a8c0', sub: 'days written' },
   ];
 
   const weekActivity = data?.weekActivity ?? [];
   const maxCount = Math.max(...weekActivity.map(d => d.count), 1);
+  const weekTotal = weekActivity.reduce((s, d) => s + d.count, 0);
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: 900, margin: '0 auto' }}>
+    <div style={{ padding: '32px 40px', maxWidth: 960, margin: '0 auto' }}>
+      {/* Greeting */}
       <div style={{ marginBottom: 28 }}>
         <div style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, marginBottom: 8 }}>Dashboard</div>
         <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 34, fontWeight: 300, color: ink, letterSpacing: '-.03em' }}>
@@ -68,19 +73,32 @@ export function PageDashboard({ night }: Props) {
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 20 }}>
         {statCards.map(s => (
           <Tilt key={s.label} style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '20px 22px' }}>
             <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 38, fontWeight: 300, color: ink, letterSpacing: '-.04em', lineHeight: 1 }}>{s.val}</div>
             <div style={{ fontSize: 11, color: ink3, fontWeight: 300, marginTop: 6, letterSpacing: '.06em' }}>{s.label}</div>
-            <div style={{ height: 3, borderRadius: 50, background: `linear-gradient(90deg,${s.color},transparent)`, marginTop: 10, opacity: .6 }} />
+            <div style={{ fontSize: 9, color: ink3, opacity: .7, marginTop: 2 }}>{s.sub}</div>
+            <div style={{ height: 3, borderRadius: 50, background: `linear-gradient(90deg,${s.color},transparent)`, marginTop: 8, opacity: .6 }} />
           </Tilt>
         ))}
       </div>
 
-      {/* Daily prompt + recent */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 14 }}>
+      {/* Streak + daily prompt */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 14, marginBottom: 14 }}>
+        {/* Streak badge */}
+        <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: night ? 'rgba(192,132,252,.08)' : 'rgba(192,132,252,.06)', padding: '20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minWidth: 120 }}>
+          <div style={{ fontSize: 42, fontFamily: "'Playfair Display',serif", fontWeight: 300, color: '#c084fc', lineHeight: 1 }}>
+            {data ? data.currentStreak : '—'}
+          </div>
+          <div style={{ fontSize: 10, color: ink3, letterSpacing: '.1em', textTransform: 'uppercase', marginTop: 6 }}>day streak</div>
+          {data && data.currentStreak > 0 && (
+            <div style={{ fontSize: 9, color: '#c084fc', marginTop: 4, opacity: .8 }}>🔥 keep going</div>
+          )}
+        </div>
+
+        {/* Daily prompt */}
         <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: night ? 'rgba(208,100,136,.1)' : 'linear-gradient(148deg,rgba(252,228,240,.9),rgba(238,230,255,.75))', padding: '24px 26px' }}>
           <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: '#d06888', marginBottom: 10 }}>Daily Prompt</div>
           <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 17, fontStyle: 'italic', fontWeight: 300, color: ink2, lineHeight: 1.8 }}>
@@ -88,16 +106,23 @@ export function PageDashboard({ night }: Props) {
           </div>
           <button onClick={() => onNav('Sanctuary')} style={{ marginTop: 18, padding: '10px 24px', borderRadius: 50, border: 'none', background: 'linear-gradient(135deg,#c084fc,#7c3aed)', color: '#fff', fontSize: 12, fontFamily: "'DM Sans',sans-serif", cursor: 'pointer', letterSpacing: '.04em' }}>Begin writing</button>
         </div>
+      </div>
 
-        <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '24px 26px' }}>
-          <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, marginBottom: 14 }}>Recent Poems</div>
+      {/* Recent Poems + Recent Fan Fics */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+        {/* Recent Poems */}
+        <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3 }}>Recent Poems</div>
+            <button onClick={() => onNav('Poems')} style={{ fontSize: 10, color: '#c084fc', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>View all →</button>
+          </div>
           {data === null ? (
             <div style={{ fontSize: 13, color: ink3, fontStyle: 'italic' }}>Loading…</div>
           ) : data.recentPoems.length === 0 ? (
-            <div style={{ fontSize: 13, color: ink3, fontStyle: 'italic', fontFamily: "'Playfair Display',serif" }}>No poems yet — write your first one.</div>
+            <div style={{ fontSize: 13, color: ink3, fontStyle: 'italic', fontFamily: "'Playfair Display',serif" }}>No poems yet.</div>
           ) : data.recentPoems.map((p, i, arr) => (
-            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '9px 0', borderBottom: i < arr.length - 1 ? `1px solid ${cardBd}` : 'none' }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#c084fc', opacity: .6, flexShrink: 0 }} />
+            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < arr.length - 1 ? `1px solid ${cardBd}` : 'none' }}>
+              <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#c084fc', opacity: .6, flexShrink: 0 }} />
               <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, color: ink2, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</div>
               <div style={{ fontSize: 10, color: ink3, fontWeight: 300, flexShrink: 0 }}>
                 {new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -105,14 +130,38 @@ export function PageDashboard({ night }: Props) {
             </div>
           ))}
         </div>
+
+        {/* Recent Fan Fics */}
+        <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3 }}>Recent Fan Fics</div>
+            <button onClick={() => onNav('Fan Fiction')} style={{ fontSize: 10, color: '#f472b6', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>View all →</button>
+          </div>
+          {data === null ? (
+            <div style={{ fontSize: 13, color: ink3, fontStyle: 'italic' }}>Loading…</div>
+          ) : data.recentFanfics.length === 0 ? (
+            <div style={{ fontSize: 13, color: ink3, fontStyle: 'italic', fontFamily: "'Playfair Display',serif" }}>No fan fics yet.</div>
+          ) : data.recentFanfics.map((f, i, arr) => (
+            <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < arr.length - 1 ? `1px solid ${cardBd}` : 'none' }}>
+              <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#f472b6', opacity: .6, flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, color: ink2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.title}</div>
+                {f.fandom && <div style={{ fontSize: 10, color: ink3, fontWeight: 300, marginTop: 1 }}>{f.fandom} · {f.chapterCount} ch</div>}
+              </div>
+              <div style={{ fontSize: 10, color: ink3, fontWeight: 300, flexShrink: 0 }}>
+                {new Date(f.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Week activity */}
-      <div style={{ marginTop: 14, borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 26px' }}>
+      {/* Week activity (Sun → Sat) */}
+      <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 26px' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 16 }}>
           <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3 }}>This Week</div>
           <div style={{ fontSize: 11, color: ink3, fontWeight: 300 }}>
-            {weekActivity.reduce((s, d) => s + d.count, 0)} pieces written
+            {weekTotal > 0 ? `${weekTotal} piece${weekTotal === 1 ? '' : 's'} written` : 'Nothing written yet this week'}
           </div>
         </div>
         {data === null ? (
@@ -126,8 +175,17 @@ export function PageDashboard({ night }: Props) {
                   {d.count > 0 && (
                     <div style={{ fontSize: 9, color: ink3, fontWeight: 300 }}>{d.count}</div>
                   )}
-                  <div style={{ width: '100%', height: h, borderRadius: 6, background: d.count > 0 ? 'linear-gradient(180deg,#c084fc,#7c3aed)' : (night ? 'rgba(255,255,255,.08)' : 'rgba(208,191,240,.28)'), transition: 'height .3s' }} />
-                  <span style={{ fontSize: 10, color: ink3, fontWeight: 300 }}>{d.label}</span>
+                  <div style={{
+                    width: '100%', height: h, borderRadius: 6,
+                    background: d.future
+                      ? (night ? 'rgba(255,255,255,.04)' : 'rgba(208,191,240,.12)')
+                      : d.count > 0
+                        ? 'linear-gradient(180deg,#c084fc,#7c3aed)'
+                        : (night ? 'rgba(255,255,255,.08)' : 'rgba(208,191,240,.28)'),
+                    opacity: d.future ? 0.4 : 1,
+                    transition: 'height .3s',
+                  }} />
+                  <span style={{ fontSize: 10, color: d.future ? ink3 : ink3, fontWeight: 300, opacity: d.future ? 0.4 : 1 }}>{d.label}</span>
                 </div>
               );
             })}

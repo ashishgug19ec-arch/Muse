@@ -5,6 +5,7 @@ import { eq, gte, lt, and } from "drizzle-orm";
 export interface DayActivity {
   label: string;
   count: number;
+  future: boolean;
 }
 
 export async function updateStreak(userId: string): Promise<void> {
@@ -49,13 +50,30 @@ export async function updateStreak(userId: string): Promise<void> {
     .where(eq(userStats.userId, userId));
 }
 
+// Returns Sun–Sat of the current calendar week. Future days have count=0, future=true.
 export async function getWeekActivity(userId: string): Promise<DayActivity[]> {
   const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Sunday of this week
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+
   const result: DayActivity[] = [];
 
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(weekStart);
+    date.setDate(weekStart.getDate() + i);
+
+    const isFuture = date > today;
+    const label = DAY_LABELS[date.getDay()];
+
+    if (isFuture) {
+      result.push({ label, count: 0, future: true });
+      continue;
+    }
+
     const dayStart = date.toISOString().slice(0, 10);
     const nextDay = new Date(date);
     nextDay.setDate(nextDay.getDate() + 1);
@@ -70,11 +88,27 @@ export async function getWeekActivity(userId: string): Promise<DayActivity[]> {
       ).all(),
     ]);
 
-    result.push({
-      label: DAY_LABELS[date.getDay()],
-      count: poemRows.length + chapterRows.length,
-    });
+    result.push({ label, count: poemRows.length + chapterRows.length, future: false });
   }
 
   return result;
+}
+
+// Count distinct writing days in a date range (pieces from poems + chapters tables).
+export async function countWritingDays(userId: string, fromDate: string): Promise<number> {
+  const [poemRows, chapterRows] = await Promise.all([
+    db.select({ createdAt: poems.createdAt }).from(poems).where(
+      and(eq(poems.userId, userId), gte(poems.createdAt, fromDate))
+    ).all(),
+    db.select({ createdAt: chapters.createdAt }).from(chapters).where(
+      and(eq(chapters.userId, userId), gte(chapters.createdAt, fromDate))
+    ).all(),
+  ]);
+
+  const days = new Set([
+    ...poemRows.map(r => r.createdAt?.slice(0, 10) ?? ''),
+    ...chapterRows.map(r => r.createdAt?.slice(0, 10) ?? ''),
+  ]);
+  days.delete('');
+  return days.size;
 }
