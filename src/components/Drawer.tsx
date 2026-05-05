@@ -6,26 +6,21 @@ import { useMuseStore } from '@/lib/store';
 
 const PAGES = [
   { section: 'Writing', items: [
-    { icon: '✦', label: 'Dashboard',   badge: '3'  },
-    { icon: '◎', label: 'Sanctuary',   badge: null },
-    { icon: '✐', label: 'New Poem',    badge: null },
+    { icon: '✦', label: 'Dashboard'      },
+    { icon: '◎', label: 'Sanctuary'      },
   ]},
   { section: 'My Garden', items: [
-    { icon: '⊞', label: 'My Library',     badge: '47' },
-    { icon: '◈', label: 'Collections',    badge: null },
-    { icon: '✦', label: 'Scraps',         badge: '12' },
-    { icon: '◉', label: 'Ikigai Journal', badge: null },
+    { icon: '⊞', label: 'My Library'     },
+    { icon: '◈', label: 'Collections'    },
+    { icon: '✦', label: 'Scraps'         },
+    { icon: '◉', label: 'Ikigai Journal' },
   ]},
-  { section: 'Discover', items: [
-    { icon: '◎', label: 'Explore',       badge: null  },
-    { icon: '⊞', label: 'Fan Fiction',   badge: 'new' },
-    { icon: '◎', label: 'Story Reader',  badge: null  },
-    { icon: '✐', label: 'Story Upload',  badge: null  },
+  { section: 'Fan Fiction', items: [
+    { icon: '✐', label: 'Fan Fiction'    },
   ]},
   { section: 'Account', items: [
-    { icon: '◉', label: 'Author Profile', badge: null },
-    { icon: '◈', label: 'Notifications',  badge: '5'  },
-    { icon: '⊟', label: 'Settings',       badge: null },
+    { icon: '◉', label: 'Profile'        },
+    { icon: '⊟', label: 'Settings'       },
   ]},
 ];
 
@@ -50,8 +45,6 @@ export function Drawer() {
   const iconCol    = n ? 'rgba(200,160,255,.7)'     : '#8a7aa0';
   const hoverBg    = n ? 'rgba(160,124,200,.15)'    : 'rgba(208,191,240,.28)';
 
-  const visiblePages = isSignedIn ? PAGES : [];
-
   return (
     <>
       {/* Backdrop */}
@@ -67,7 +60,7 @@ export function Drawer() {
       {/* Panel */}
       <div style={{
         position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 200,
-        width: 290,
+        width: 270,
         background: panelBg,
         backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)',
         borderRight: `1px solid ${borderCol}`,
@@ -97,7 +90,7 @@ export function Drawer() {
           }}>✕</button>
         </div>
 
-        {/* User chip — signed in */}
+        {/* User chip */}
         {isLoaded && isSignedIn && (
           <div style={{
             margin: '14px 18px', padding: '12px 16px', borderRadius: 16,
@@ -113,18 +106,18 @@ export function Drawer() {
             }}>
               {user?.firstName?.[0] ?? user?.emailAddresses?.[0]?.emailAddress?.[0]?.toUpperCase() ?? '🌸'}
             </div>
-            <div>
-              <div style={{ fontSize: 13, color: nameCol, fontWeight: 400 }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 13, color: nameCol, fontWeight: 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {user?.firstName ? `${user.firstName}${user.lastName ? ' ' + user.lastName : ''}` : 'My garden'}
               </div>
-              <div style={{ fontSize: 10, color: n ? 'rgba(200,170,255,.6)' : '#8a7aa0', fontWeight: 300, marginTop: 2 }}>
+              <div style={{ fontSize: 10, color: n ? 'rgba(200,170,255,.6)' : '#8a7aa0', fontWeight: 300, marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {user?.emailAddresses?.[0]?.emailAddress}
               </div>
             </div>
           </div>
         )}
 
-        {/* Sign-in prompt — signed out */}
+        {/* Sign-in prompt */}
         {isLoaded && !isSignedIn && (
           <div style={{
             margin: '14px 18px', padding: '14px 16px', borderRadius: 16,
@@ -148,10 +141,10 @@ export function Drawer() {
           </div>
         )}
 
-        {/* Nav sections — filtered by auth */}
-        <div style={{ flex: 1, padding: '0 12px' }}>
-          {visiblePages.map(section => (
-            <div key={section.section} style={{ marginBottom: 18 }}>
+        {/* Nav */}
+        <div style={{ flex: 1, padding: '4px 12px 12px' }}>
+          {(isSignedIn ? PAGES : []).map(section => (
+            <div key={section.section} style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 9, fontWeight: 400, letterSpacing: '.1em', textTransform: 'uppercase', color: sectionCol, padding: '0 8px', marginBottom: 4 }}>
                 {section.section}
               </div>
@@ -166,48 +159,26 @@ export function Drawer() {
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
                   <span style={{ fontSize: 12, color: iconCol, width: 18 }}>{item.icon}</span>
-                  <span style={{ flex: 1, fontSize: 13, color: labelCol, fontWeight: 300 }}>{item.label}</span>
-                  {item.badge && (
-                    <span style={{
-                      fontSize: 9,
-                      background: item.badge === 'new' ? 'rgba(124,58,237,.2)' : 'rgba(208,191,240,.42)',
-                      color: item.badge === 'new' ? '#7c3aed' : '#5b21b6',
-                      padding: '2px 7px', borderRadius: 50,
-                      border: '1px solid rgba(208,191,240,.5)', fontWeight: 400,
-                    }}>{item.badge}</span>
-                  )}
+                  <span style={{ fontSize: 13, color: labelCol, fontWeight: 300 }}>{item.label}</span>
                 </button>
               ))}
             </div>
           ))}
         </div>
 
-        {/* Footer */}
-        <div style={{
-          padding: '16px 18px 24px',
-          borderTop: `1px solid ${borderCol}`,
-          display: 'flex', flexDirection: 'column', gap: 8,
-        }}>
+        {/* Footer CTA */}
+        <div style={{ padding: '16px 18px 24px', borderTop: `1px solid ${borderCol}` }}>
           {isSignedIn ? (
-            <>
-              <button onClick={() => handleNav('Sanctuary')} style={{
-                padding: '12px', borderRadius: 50, border: 'none',
-                background: 'linear-gradient(135deg,#c084fc,#9b72cf,#7c3aed)', color: '#fff',
-                fontSize: 13, cursor: 'pointer',
-                fontFamily: "'Playfair Display',serif", letterSpacing: '.05em',
-                boxShadow: '0 6px 24px rgba(124,58,237,.32)',
-              }}>Open Sanctuary</button>
-              <button onClick={() => handleNav('New Poem')} style={{
-                padding: '12px', borderRadius: 50,
-                border: `1.5px solid rgba(208,191,240,.52)`,
-                background: n ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.65)',
-                color: '#c084fc', fontSize: 13, cursor: 'pointer',
-                fontFamily: "'DM Sans',sans-serif", letterSpacing: '.02em',
-              }}>+ New Poem</button>
-            </>
+            <button onClick={() => handleNav('Sanctuary')} style={{
+              width: '100%', padding: '12px', borderRadius: 50, border: 'none',
+              background: 'linear-gradient(135deg,#c084fc,#9b72cf,#7c3aed)', color: '#fff',
+              fontSize: 13, cursor: 'pointer',
+              fontFamily: "'Playfair Display',serif", letterSpacing: '.05em',
+              boxShadow: '0 6px 24px rgba(124,58,237,.32)',
+            }}>Open Sanctuary</button>
           ) : (
             <button onClick={() => { setDrawerOpen(false); router.push('/sign-up'); }} style={{
-              padding: '12px', borderRadius: 50, border: 'none',
+              width: '100%', padding: '12px', borderRadius: 50, border: 'none',
               background: 'linear-gradient(135deg,#c084fc,#9b72cf,#7c3aed)', color: '#fff',
               fontSize: 13, cursor: 'pointer',
               fontFamily: "'Playfair Display',serif", letterSpacing: '.05em',

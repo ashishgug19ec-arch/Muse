@@ -1,90 +1,96 @@
 'use client';
-import { Tilt } from '@/components/ui/Tilt';
-import { Chip } from '@/components/ui/Chip';
-import { ProgressBar } from '@/components/ui/ProgressBar';
+import { useEffect, useState } from 'react';
+import { useUser } from '@clerk/nextjs';
 
 interface Props { night: boolean; }
 
-const recentPoems = [
-  { title: 'Between two words', form: 'Haiku', date: 'Apr 12', likes: 48 },
-  { title: 'Instructions for forgetting', form: 'Free verse', date: 'Mar 28', likes: 112 },
-  { title: "Selenophile's Diary", form: 'Sonnet', date: 'Mar 15', likes: 89 },
-];
+interface DashData {
+  stats: { totalPoems: number; totalReaders: number; currentStreak: number } | null;
+  recentPoems: { id: string; title: string; createdAt: string }[];
+}
 
-const stats = [
-  { label: 'Poems', value: '47' },
-  { label: 'Readers', value: '1.2k' },
-  { label: 'Collections', value: '5' },
-  { label: 'Streak', value: '12d' },
-];
+function fmt(n: number) {
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  return String(n);
+}
 
 export function PageAuthorProfile({ night }: Props) {
+  const { user } = useUser();
+  const [data, setData] = useState<DashData | null>(null);
+
   const ink  = night ? 'rgba(230,220,255,.9)'  : '#1e1628';
   const ink2 = night ? 'rgba(200,180,255,.7)'  : '#4a3960';
   const ink3 = night ? 'rgba(160,140,200,.55)' : '#8a7aa0';
   const cardBd = night ? 'rgba(160,124,200,.2)'  : 'rgba(208,191,240,.52)';
   const cardBg = night ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.72)';
 
+  useEffect(() => {
+    fetch('/api/dashboard')
+      .then(r => r.json())
+      .then(setData)
+      .catch(() => {});
+  }, []);
+
+  const s = data?.stats;
+  const statItems = [
+    { label: 'Poems',   value: s ? fmt(s.totalPoems)   : '—' },
+    { label: 'Readers', value: s ? fmt(s.totalReaders) : '—' },
+    { label: 'Streak',  value: s ? `${s.currentStreak}d` : '—' },
+  ];
+
+  const initials = user?.firstName?.[0] ?? user?.emailAddresses?.[0]?.emailAddress?.[0]?.toUpperCase() ?? '🌸';
+  const displayName = user?.firstName
+    ? `${user.firstName}${user.lastName ? ' ' + user.lastName : ''}`
+    : user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ?? 'Poet';
+
   return (
-    <div style={{ padding: '24px 32px' }}>
-      {/* Header */}
+    <div style={{ padding: '24px 40px', maxWidth: 700, margin: '0 auto' }}>
+      {/* Profile header */}
       <div style={{ borderRadius: 22, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '28px', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20 }}>
-          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg,#c084fc,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0 }}>🌸</div>
+          <div style={{
+            width: 72, height: 72, borderRadius: '50%', flexShrink: 0,
+            background: 'linear-gradient(135deg,#c084fc,#7c3aed)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 28, color: '#fff', fontWeight: 600,
+          }}>
+            {initials}
+          </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 400, color: ink, marginBottom: 4 }}>Luna Ashwood</div>
-            <div style={{ fontSize: 12, color: ink3, marginBottom: 12 }}>Poet · Moon enthusiast · Writing since 2021</div>
-            <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, fontStyle: 'italic', color: ink2, lineHeight: 1.7, maxWidth: 420 }}>
-              "I write to find the words for things that happen in the quiet hours."
+            <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 400, color: ink, marginBottom: 4 }}>{displayName}</div>
+            <div style={{ fontSize: 12, color: ink3, marginBottom: 14 }}>
+              {user?.emailAddresses?.[0]?.emailAddress}
             </div>
           </div>
-          <button style={{ padding: '9px 22px', borderRadius: 50, border: 'none', background: 'linear-gradient(135deg,#c084fc,#7c3aed)', color: '#fff', fontSize: 12, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>Follow</button>
         </div>
 
         {/* Stats row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginTop: 24 }}>
-          {stats.map(s => (
-            <div key={s.label} style={{ textAlign: 'center' }}>
-              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 300, color: ink }}>{s.value}</div>
-              <div style={{ fontSize: 10, color: ink3, textTransform: 'uppercase', letterSpacing: '.08em', marginTop: 2 }}>{s.label}</div>
+        <div style={{ display: 'flex', gap: 28, marginTop: 20, paddingTop: 20, borderTop: `1px solid ${cardBd}` }}>
+          {statItems.map(st => (
+            <div key={st.label}>
+              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 300, color: ink }}>{st.value}</div>
+              <div style={{ fontSize: 10, color: ink3, fontWeight: 300, letterSpacing: '.06em', marginTop: 2 }}>{st.label}</div>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-        {/* Recent poems */}
-        <div>
-          <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, marginBottom: 14 }}>Recent Poems</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {recentPoems.map(p => (
-              <Tilt key={p.title} style={{ borderRadius: 18, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(18px)', padding: '16px 18px', cursor: 'pointer' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <Chip label={p.form} color="purple" />
-                  <span style={{ fontSize: 10, color: ink3 }}>♡ {p.likes}</span>
-                </div>
-                <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 14, color: ink, fontWeight: 400 }}>{p.title}</div>
-                <div style={{ fontSize: 10, color: ink3, marginTop: 4 }}>{p.date}</div>
-              </Tilt>
-            ))}
-          </div>
-        </div>
-
-        {/* Ikigai */}
-        <div>
-          <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, marginBottom: 14 }}>Ikigai</div>
-          <div style={{ borderRadius: 18, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(18px)', padding: '20px 22px' }}>
-            <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, fontStyle: 'italic', color: ink2, lineHeight: 1.8, marginBottom: 16 }}>
-              "Writing the feelings that words almost miss, for the women who have felt the same thing but could not say it."
-            </div>
-            <div style={{ marginBottom: 10 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: ink3, marginBottom: 6 }}>
-                <span>Alignment</span><span>92%</span>
-              </div>
-              <ProgressBar pct={92} color="purple" />
+      {/* Recent poems */}
+      <div style={{ borderRadius: 22, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '24px 28px' }}>
+        <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, marginBottom: 16 }}>Recent Poems</div>
+        {!data ? (
+          <div style={{ fontSize: 13, color: ink3, fontStyle: 'italic' }}>Loading…</div>
+        ) : data.recentPoems.length === 0 ? (
+          <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 14, fontStyle: 'italic', color: ink3 }}>No poems yet.</div>
+        ) : data.recentPoems.map((p, i) => (
+          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: i < data.recentPoems.length - 1 ? `1px solid ${cardBd}` : 'none' }}>
+            <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#c084fc', opacity: .6, flexShrink: 0 }} />
+            <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 14, color: ink2, flex: 1 }}>{p.title}</div>
+            <div style={{ fontSize: 10, color: ink3, fontWeight: 300 }}>
+              {new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );
