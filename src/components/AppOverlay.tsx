@@ -6,7 +6,7 @@ import { PageSanctuary } from './pages/PageSanctuary';
 import { PageLibrary } from './pages/PageLibrary';
 import { PageCollections } from './pages/PageCollections';
 import { PageScraps } from './pages/PageScraps';
-import { PageIkigai } from './pages/PageIkigai';
+// import { PageIkigai } from './pages/PageIkigai';
 import { PageFanFiction } from './pages/PageFanFiction';
 import { PageAuthorProfile } from './pages/PageAuthorProfile';
 import { PageSettings } from './pages/PageSettings';
@@ -19,8 +19,8 @@ const PAGE_MAP: Record<string, React.ComponentType<{ night: boolean }>> = {
   'my library': PageLibrary,
   collections: PageCollections,
   scraps: PageScraps,
-  ikigai: PageIkigai,
-  'ikigai journal': PageIkigai,
+  // ikigai: PageIkigai,
+  // 'ikigai journal': PageIkigai,
   'fan fiction': PageFanFiction,
   'fan-fiction': PageFanFiction,
   profile: PageAuthorProfile,
