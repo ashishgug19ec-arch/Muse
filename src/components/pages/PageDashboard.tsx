@@ -15,7 +15,7 @@ interface DashboardData {
   yearDays: number;
   recentPoems: { id: string; title: string; createdAt: string }[];
   recentFanfics: { id: string; title: string; fandom: string | null; status: string; chapterCount: number; createdAt: string }[];
-  weekActivity: { label: string; poemCount: number; chapterCount: number; future: boolean }[];
+  weekActivity: { label: string; poemCount: number; fanficCount: number; future: boolean }[];
   dailyPrompt: string;
 }
 
@@ -58,8 +58,8 @@ export function PageDashboard({ night }: Props) {
 
   const [hoveredDay, setHoveredDay] = useState<number | null>(null);
   const weekActivity = data?.weekActivity ?? [];
-  const maxCount = Math.max(...weekActivity.map(d => d.poemCount + d.chapterCount), 1);
-  const weekTotal = weekActivity.reduce((s, d) => s + d.poemCount + d.chapterCount, 0);
+  const maxCount = Math.max(...weekActivity.map(d => d.poemCount + d.fanficCount), 1);
+  const weekTotal = weekActivity.reduce((s, d) => s + d.poemCount + d.fanficCount, 0);
 
   return (
     <div style={{ padding: '32px 40px', maxWidth: 960, margin: '0 auto' }}>
@@ -170,7 +170,7 @@ export function PageDashboard({ night }: Props) {
         ) : (
           <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
             {weekActivity.map((d, i) => {
-              const total = d.poemCount + d.chapterCount;
+              const total = d.poemCount + d.fanficCount;
               const h = total > 0 ? Math.max(24, Math.round((total / maxCount) * 64)) : 20;
               const isHovered = hoveredDay === i;
               return (
@@ -191,13 +191,13 @@ export function PageDashboard({ night }: Props) {
                       pointerEvents: 'none',
                     }}>
                       {d.poemCount > 0 && (
-                        <div style={{ fontSize: 11, color: '#c084fc', marginBottom: d.chapterCount > 0 ? 3 : 0 }}>
+                        <div style={{ fontSize: 11, color: '#c084fc', marginBottom: d.fanficCount > 0 ? 3 : 0 }}>
                           {d.poemCount} poem{d.poemCount !== 1 ? 's' : ''}
                         </div>
                       )}
-                      {d.chapterCount > 0 && (
+                      {d.fanficCount > 0 && (
                         <div style={{ fontSize: 11, color: '#f472b6' }}>
-                          {d.chapterCount} chapter{d.chapterCount !== 1 ? 's' : ''}
+                          {d.fanficCount} fan fic{d.fanficCount !== 1 ? 's' : ''}
                         </div>
                       )}
                       <div style={{ position: 'absolute', bottom: -5, left: '50%', transform: 'translateX(-50%)', width: 8, height: 8, background: night ? 'rgba(30,15,50,.96)' : 'rgba(255,252,255,.98)', border: `1px solid ${cardBd}`, borderTop: 'none', borderLeft: 'none', rotate: '45deg' }} />

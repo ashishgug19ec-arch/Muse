@@ -1,11 +1,11 @@
 import { db } from "./db";
-import { userStats, poems, chapters } from "./db/schema";
+import { userStats, poems, fanfics, chapters } from "./db/schema";
 import { eq, gte, lt, and } from "drizzle-orm";
 
 export interface DayActivity {
   label: string;
   poemCount: number;
-  chapterCount: number;
+  fanficCount: number; // fanfic stories created + chapters written
   future: boolean;
 }
 
@@ -90,26 +90,32 @@ export async function getWeekActivity(userId: string): Promise<DayActivity[]> {
     nextDay.setDate(nextDay.getDate() + 1);
     const dayEnd = localDateStr(nextDay);
 
-    const [poemRows, chapterRows] = await Promise.all([
+    const [poemRows, fanficRows, chapterRows] = await Promise.all([
       db.select({ id: poems.id }).from(poems).where(
         and(eq(poems.userId, userId), gte(poems.createdAt, dayStart), lt(poems.createdAt, dayEnd))
+      ).all(),
+      db.select({ id: fanfics.id }).from(fanfics).where(
+        and(eq(fanfics.userId, userId), gte(fanfics.createdAt, dayStart), lt(fanfics.createdAt, dayEnd))
       ).all(),
       db.select({ id: chapters.id }).from(chapters).where(
         and(eq(chapters.userId, userId), gte(chapters.createdAt, dayStart), lt(chapters.createdAt, dayEnd))
       ).all(),
     ]);
 
-    result.push({ label, poemCount: poemRows.length, chapterCount: chapterRows.length, future: false });
+    result.push({ label, poemCount: poemRows.length, fanficCount: fanficRows.length + chapterRows.length, future: false });
   }
 
   return result;
 }
 
-// Count distinct local writing days from a given date onward.
+// Count distinct local writing days from a given date onward (poems + fanfics + chapters).
 export async function countWritingDays(userId: string, fromDate: string): Promise<number> {
-  const [poemRows, chapterRows] = await Promise.all([
+  const [poemRows, fanficRows, chapterRows] = await Promise.all([
     db.select({ createdAt: poems.createdAt }).from(poems).where(
       and(eq(poems.userId, userId), gte(poems.createdAt, fromDate))
+    ).all(),
+    db.select({ createdAt: fanfics.createdAt }).from(fanfics).where(
+      and(eq(fanfics.userId, userId), gte(fanfics.createdAt, fromDate))
     ).all(),
     db.select({ createdAt: chapters.createdAt }).from(chapters).where(
       and(eq(chapters.userId, userId), gte(chapters.createdAt, fromDate))
@@ -118,6 +124,7 @@ export async function countWritingDays(userId: string, fromDate: string): Promis
 
   const days = new Set([
     ...poemRows.map(r => r.createdAt?.slice(0, 10) ?? ''),
+    ...fanficRows.map(r => r.createdAt?.slice(0, 10) ?? ''),
     ...chapterRows.map(r => r.createdAt?.slice(0, 10) ?? ''),
   ]);
   days.delete('');
