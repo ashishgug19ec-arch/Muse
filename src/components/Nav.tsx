@@ -39,7 +39,7 @@ export function Nav() {
     <nav style={{
       position: 'sticky', top: 0, zIndex: 100,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '18px 60px',
+      padding: '18px 60px 18px 44px',
       background: navBg,
       backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
       borderBottom: `1px solid ${borderCol}`,
@@ -48,14 +48,13 @@ export function Nav() {
       {/* Left: hamburger + logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         <button onClick={() => setDrawerOpen(true)} aria-label="Menu" style={{
-          width: 36, height: 36, borderRadius: '50%',
-          border: '1px solid rgba(208,191,240,.52)',
-          background: night ? 'rgba(255,255,255,.08)' : 'rgba(255,255,255,.65)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
-          cursor: 'pointer', flexShrink: 0,
+          width: 32, height: 32, borderRadius: 0,
+          border: 'none', background: 'none',
+          display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', gap: 5,
+          cursor: 'pointer', flexShrink: 0, padding: 0,
         }}>
           {[0,1,2].map(i => (
-            <div key={i} style={{ width: 14, height: 1, background: night ? 'rgba(220,200,255,.7)' : '#4a3960' }} />
+            <div key={i} style={{ width: 22, height: 2.5, background: night ? 'rgba(200,160,255,.5)' : 'rgba(138,112,160,.45)', borderRadius: 99 }} />
           ))}
         </button>
         <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 11, textDecoration: 'none' }}>
