@@ -62,14 +62,6 @@ export function PageDashboard({ night }: Props) {
   const weekActivity = data?.weekActivity ?? [];
   const maxCount = Math.max(...weekActivity.map(d => (d.poemCount ?? 0) + (d.fanficCount ?? 0)), 1);
   const weekTotal = weekActivity.reduce((s, d) => s + (d.poemCount ?? 0) + (d.fanficCount ?? 0), 0);
-  const weekPoems = weekActivity.reduce((s, d) => s + (d.poemCount ?? 0), 0);
-  const weekFanfics = weekActivity.reduce((s, d) => s + (d.fanficCount ?? 0), 0);
-
-  const activityCols = [
-    { label: 'This Week',  poems: weekPoems,           fanfics: weekFanfics },
-    { label: 'This Month', poems: data?.monthPoems ?? 0, fanfics: data?.monthFanfics ?? 0 },
-    { label: 'This Year',  poems: data?.yearPoems ?? 0,  fanfics: data?.yearFanfics ?? 0 },
-  ];
 
   return (
     <div style={{ padding: '32px 40px', maxWidth: 960, margin: '0 auto' }}>
@@ -163,60 +155,6 @@ export function PageDashboard({ night }: Props) {
         </div>
       </div>
 
-      {/* Writing Activity: Week / Month / Year breakdown */}
-      <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 26px', marginBottom: 14 }}>
-        <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, marginBottom: 18 }}>Your Writing</div>
-
-        {/* Header row */}
-        <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr 1fr', gap: 0, marginBottom: 10 }}>
-          <div />
-          {activityCols.map(c => (
-            <div key={c.label} style={{ fontSize: 9, letterSpacing: '.08em', textTransform: 'uppercase', color: ink3, textAlign: 'center', fontWeight: 400 }}>{c.label}</div>
-          ))}
-        </div>
-
-        {/* Poems row */}
-        <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr 1fr', gap: 0, padding: '10px 0', borderTop: `1px solid ${cardBd}` }}>
-          <div style={{ fontSize: 11, color: '#c084fc', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#c084fc' }} />
-            Poems
-          </div>
-          {activityCols.map(c => (
-            <div key={c.label} style={{ textAlign: 'center' }}>
-              <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 300, color: ink, lineHeight: 1 }}>
-                {data === null ? '—' : c.poems}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Fanfics row */}
-        <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr 1fr', gap: 0, padding: '10px 0', borderTop: `1px solid ${cardBd}` }}>
-          <div style={{ fontSize: 11, color: '#f472b6', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#f472b6' }} />
-            Fanfics
-          </div>
-          {activityCols.map(c => (
-            <div key={c.label} style={{ textAlign: 'center' }}>
-              <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 300, color: ink, lineHeight: 1 }}>
-                {data === null ? '—' : c.fanfics}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Total row */}
-        <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr 1fr', gap: 0, padding: '10px 0', borderTop: `1px solid ${cardBd}` }}>
-          <div style={{ fontSize: 11, color: ink3, display: 'flex', alignItems: 'center' }}>Total</div>
-          {activityCols.map(c => (
-            <div key={c.label} style={{ textAlign: 'center' }}>
-              <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 300, color: '#a855f7', lineHeight: 1 }}>
-                {data === null ? '—' : c.poems + c.fanfics}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* Week bar chart — Sun → Sat */}
       <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 26px' }}>
