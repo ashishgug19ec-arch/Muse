@@ -15,7 +15,7 @@ interface DashboardData {
   yearDays: number;
   recentPoems: { id: string; title: string; createdAt: string }[];
   recentFanfics: { id: string; title: string; fandom: string | null; status: string; chapterCount: number; createdAt: string }[];
-  weekActivity: { label: string; count: number; future: boolean }[];
+  weekActivity: { label: string; poemCount: number; chapterCount: number; future: boolean }[];
   dailyPrompt: string;
 }
 
@@ -56,9 +56,10 @@ export function PageDashboard({ night }: Props) {
     { label: 'This Year',  val: data ? `${data.yearDays}d`    : '—', color: '#f0a8c0', sub: 'days written' },
   ];
 
+  const [hoveredDay, setHoveredDay] = useState<number | null>(null);
   const weekActivity = data?.weekActivity ?? [];
-  const maxCount = Math.max(...weekActivity.map(d => d.count), 1);
-  const weekTotal = weekActivity.reduce((s, d) => s + d.count, 0);
+  const maxCount = Math.max(...weekActivity.map(d => d.poemCount + d.chapterCount), 1);
+  const weekTotal = weekActivity.reduce((s, d) => s + d.poemCount + d.chapterCount, 0);
 
   return (
     <div style={{ padding: '32px 40px', maxWidth: 960, margin: '0 auto' }}>
@@ -169,23 +170,55 @@ export function PageDashboard({ night }: Props) {
         ) : (
           <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
             {weekActivity.map((d, i) => {
-              const h = d.count > 0 ? Math.max(24, Math.round((d.count / maxCount) * 64)) : 20;
+              const total = d.poemCount + d.chapterCount;
+              const h = total > 0 ? Math.max(24, Math.round((total / maxCount) * 64)) : 20;
+              const isHovered = hoveredDay === i;
               return (
-                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                  {d.count > 0 && (
-                    <div style={{ fontSize: 9, color: ink3, fontWeight: 300 }}>{d.count}</div>
+                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, position: 'relative' }}
+                  onMouseEnter={() => !d.future && total > 0 && setHoveredDay(i)}
+                  onMouseLeave={() => setHoveredDay(null)}
+                >
+                  {/* Tooltip */}
+                  {isHovered && (
+                    <div style={{
+                      position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)',
+                      marginBottom: 8, zIndex: 10,
+                      background: night ? 'rgba(30,15,50,.96)' : 'rgba(255,252,255,.98)',
+                      border: `1px solid ${cardBd}`,
+                      borderRadius: 10, padding: '8px 12px',
+                      boxShadow: '0 6px 24px rgba(0,0,0,.15)',
+                      whiteSpace: 'nowrap',
+                      pointerEvents: 'none',
+                    }}>
+                      {d.poemCount > 0 && (
+                        <div style={{ fontSize: 11, color: '#c084fc', marginBottom: d.chapterCount > 0 ? 3 : 0 }}>
+                          {d.poemCount} poem{d.poemCount !== 1 ? 's' : ''}
+                        </div>
+                      )}
+                      {d.chapterCount > 0 && (
+                        <div style={{ fontSize: 11, color: '#f472b6' }}>
+                          {d.chapterCount} chapter{d.chapterCount !== 1 ? 's' : ''}
+                        </div>
+                      )}
+                      <div style={{ position: 'absolute', bottom: -5, left: '50%', transform: 'translateX(-50%)', width: 8, height: 8, background: night ? 'rgba(30,15,50,.96)' : 'rgba(255,252,255,.98)', border: `1px solid ${cardBd}`, borderTop: 'none', borderLeft: 'none', rotate: '45deg' }} />
+                    </div>
+                  )}
+
+                  {total > 0 && (
+                    <div style={{ fontSize: 9, color: ink3, fontWeight: 300 }}>{total}</div>
                   )}
                   <div style={{
                     width: '100%', height: h, borderRadius: 6,
                     background: d.future
                       ? (night ? 'rgba(255,255,255,.04)' : 'rgba(208,191,240,.12)')
-                      : d.count > 0
+                      : total > 0
                         ? 'linear-gradient(180deg,#c084fc,#7c3aed)'
                         : (night ? 'rgba(255,255,255,.08)' : 'rgba(208,191,240,.28)'),
                     opacity: d.future ? 0.4 : 1,
                     transition: 'height .3s',
+                    cursor: total > 0 ? 'default' : 'default',
                   }} />
-                  <span style={{ fontSize: 10, color: d.future ? ink3 : ink3, fontWeight: 300, opacity: d.future ? 0.4 : 1 }}>{d.label}</span>
+                  <span style={{ fontSize: 10, color: ink3, fontWeight: 300, opacity: d.future ? 0.4 : 1 }}>{d.label}</span>
                 </div>
               );
             })}
