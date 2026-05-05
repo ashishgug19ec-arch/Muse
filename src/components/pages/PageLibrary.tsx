@@ -10,20 +10,25 @@ interface Poem {
   body: string;
   type: string | null;
   mood: string | null;
+  collectionId: string | null;
   createdAt: string;
 }
+
+interface Collection { id: string; name: string; }
 
 const MOODS = ['Reflective', 'Melancholic', 'Peaceful', 'Hopeful'];
 
 export function PageLibrary({ night }: Props) {
   const { openPage } = useMuseStore();
   const [poems, setPoems] = useState<Poem[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Poem | null>(null);
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editBody, setEditBody] = useState('');
   const [editMood, setEditMood] = useState('');
+  const [editCollectionId, setEditCollectionId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -45,18 +50,30 @@ export function PageLibrary({ night }: Props) {
   };
 
   useEffect(() => {
-    fetch('/api/poems')
-      .then(r => r.json())
-      .then(data => { setPoems(Array.isArray(data) ? data : []); setLoading(false); })
-      .catch(() => setLoading(false));
+    Promise.all([
+      fetch('/api/poems').then(r => r.json()),
+      fetch('/api/collections').then(r => r.json()),
+    ]).then(([poemData, colData]) => {
+      setPoems(Array.isArray(poemData) ? poemData : []);
+      setCollections(Array.isArray(colData) ? colData : []);
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, []);
+
+  function collectionName(id: string | null) {
+    if (!id) return null;
+    return collections.find(c => c.id === id)?.name ?? null;
+  }
 
   function openPoem(p: Poem) { setSelected(p); setEditing(false); setConfirmDelete(false); }
   function closeModal() { setSelected(null); setEditing(false); setConfirmDelete(false); }
 
   function startEdit() {
     if (!selected) return;
-    setEditTitle(selected.title); setEditBody(selected.body); setEditMood(selected.mood ?? 'Reflective');
+    setEditTitle(selected.title);
+    setEditBody(selected.body);
+    setEditMood(selected.mood ?? '');
+    setEditCollectionId(selected.collectionId);
     setEditing(true);
   }
 
@@ -66,7 +83,7 @@ export function PageLibrary({ night }: Props) {
     try {
       const res = await fetch(`/api/poems/${selected.id}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: editTitle, body: editBody, mood: editMood }),
+        body: JSON.stringify({ title: editTitle, body: editBody, mood: editMood || null, collectionId: editCollectionId }),
       });
       if (res.ok) {
         const updated = await res.json();
@@ -85,9 +102,7 @@ export function PageLibrary({ night }: Props) {
     } finally { setDeleting(false); }
   }
 
-  function firstLine(body: string) {
-    return body.split('\n').find(l => l.trim()) ?? '';
-  }
+  function firstLine(body: string) { return body.split('\n').find(l => l.trim()) ?? ''; }
 
   return (
     <div style={{ padding: '32px 40px' }}>
@@ -97,12 +112,7 @@ export function PageLibrary({ night }: Props) {
           <div style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, marginBottom: 6 }}>My Works</div>
           <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 30, fontWeight: 300, color: ink, letterSpacing: '-.03em' }}>Poems</div>
         </div>
-        <button onClick={() => openPage('Sanctuary')} style={{
-          padding: '10px 24px', borderRadius: 50, border: 'none',
-          background: 'linear-gradient(135deg,#c084fc,#7c3aed)', color: '#fff',
-          fontSize: 12, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif",
-          boxShadow: '0 4px 16px rgba(124,58,237,.28)',
-        }}>+ Write poem</button>
+        <button onClick={() => openPage('Sanctuary')} style={{ padding: '10px 24px', borderRadius: 50, border: 'none', background: 'linear-gradient(135deg,#c084fc,#7c3aed)', color: '#fff', fontSize: 12, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", boxShadow: '0 4px 16px rgba(124,58,237,.28)' }}>+ Write poem</button>
       </div>
 
       {/* Poem list */}
@@ -116,36 +126,32 @@ export function PageLibrary({ night }: Props) {
         </div>
       ) : (
         <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', overflow: 'hidden' }}>
-          {poems.map((p, i) => (
-            <div key={p.id} onClick={() => openPoem(p)} style={{
-              display: 'flex', alignItems: 'center', gap: 20,
-              padding: '16px 24px',
-              borderBottom: i < poems.length - 1 ? `1px solid ${cardBd}` : 'none',
-              cursor: 'pointer', transition: 'background .15s',
-            }}
-              onMouseEnter={e => (e.currentTarget.style.background = rowHover)}
-              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            >
-              {/* Dot */}
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(192,132,252,.5)', flexShrink: 0 }} />
-
-              {/* Title + first line */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 400, color: ink, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</div>
-                <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 12, fontStyle: 'italic', color: ink3, fontWeight: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{firstLine(p.body)}</div>
+          {poems.map((p, i) => {
+            const colName = collectionName(p.collectionId);
+            return (
+              <div key={p.id} onClick={() => openPoem(p)} style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '16px 24px', borderBottom: i < poems.length - 1 ? `1px solid ${cardBd}` : 'none', cursor: 'pointer', transition: 'background .15s' }}
+                onMouseEnter={e => (e.currentTarget.style.background = rowHover)}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+              >
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(192,132,252,.5)', flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontWeight: 400, color: ink, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</div>
+                  <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 12, fontStyle: 'italic', color: ink3, fontWeight: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{firstLine(p.body)}</div>
+                </div>
+                {/* Collection tag */}
+                {colName && (
+                  <div style={{ fontSize: 10, padding: '3px 10px', borderRadius: 50, background: 'rgba(16,185,129,.08)', color: '#10b981', border: '1px solid rgba(16,185,129,.2)', flexShrink: 0 }}>📚 {colName}</div>
+                )}
+                {/* Mood tag */}
+                {p.mood && (
+                  <div style={{ fontSize: 10, padding: '3px 12px', borderRadius: 50, background: 'rgba(124,58,237,.08)', color: '#a855f7', border: '1px solid rgba(124,58,237,.15)', flexShrink: 0 }}>{p.mood}</div>
+                )}
+                <div style={{ fontSize: 11, color: ink3, fontWeight: 300, flexShrink: 0, minWidth: 52, textAlign: 'right' }}>
+                  {new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </div>
               </div>
-
-              {/* Mood */}
-              {p.mood && (
-                <div style={{ fontSize: 10, padding: '3px 12px', borderRadius: 50, background: 'rgba(124,58,237,.08)', color: '#a855f7', border: '1px solid rgba(124,58,237,.15)', flexShrink: 0 }}>{p.mood}</div>
-              )}
-
-              {/* Date */}
-              <div style={{ fontSize: 11, color: ink3, fontWeight: 300, flexShrink: 0, minWidth: 52, textAlign: 'right' }}>
-                {new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -153,15 +159,9 @@ export function PageLibrary({ night }: Props) {
       {selected && (
         <>
           <div onClick={closeModal} style={{ position: 'fixed', inset: 0, zIndex: 400, background: 'rgba(0,0,0,.45)', backdropFilter: 'blur(4px)' }} />
-          <div style={{
-            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-            zIndex: 401, width: '90%', maxWidth: 560, maxHeight: '88vh', overflowY: 'auto',
-            background: modalBg, backdropFilter: 'blur(40px)',
-            borderRadius: 28, border: `1px solid ${cardBd}`,
-            boxShadow: '0 24px 80px rgba(0,0,0,.25)',
-            padding: '44px 48px 36px',
-          }}>
-            {/* Actions */}
+          <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 401, width: '90%', maxWidth: 560, maxHeight: '88vh', overflowY: 'auto', background: modalBg, backdropFilter: 'blur(40px)', borderRadius: 28, border: `1px solid ${cardBd}`, boxShadow: '0 24px 80px rgba(0,0,0,.25)', padding: '44px 48px 36px' }}>
+
+            {/* Action buttons */}
             <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 6 }}>
               {!editing && !confirmDelete && (
                 <>
@@ -186,11 +186,25 @@ export function PageLibrary({ night }: Props) {
                 <div style={{ fontSize: 11, color: '#c084fc', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 16 }}>Editing</div>
                 <input value={editTitle} onChange={e => setEditTitle(e.target.value)} placeholder="Title" style={{ ...inputStyle, fontFamily: "'Playfair Display',serif", fontSize: 18 }} />
                 <textarea value={editBody} onChange={e => setEditBody(e.target.value)} placeholder="Poem…" style={{ ...inputStyle, resize: 'vertical', minHeight: 160, fontFamily: "'Playfair Display',serif", fontSize: 15, fontStyle: 'italic', lineHeight: 1.9 }} />
+
+                {/* Mood */}
+                <div style={{ fontSize: 11, color: ink3, marginBottom: 8, letterSpacing: '.06em' }}>Mood</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 }}>
                   {MOODS.map(m => (
-                    <button key={m} onClick={() => setEditMood(m)} style={{ padding: '4px 14px', borderRadius: 50, fontSize: 11, cursor: 'pointer', background: editMood === m ? 'rgba(124,58,237,.18)' : 'transparent', border: `1px solid ${editMood === m ? 'rgba(124,58,237,.4)' : cardBd}`, color: editMood === m ? '#c084fc' : ink3, fontFamily: "'DM Sans',sans-serif" }}>{m}</button>
+                    <button key={m} onClick={() => setEditMood(editMood === m ? '' : m)} style={{ padding: '4px 14px', borderRadius: 50, fontSize: 11, cursor: 'pointer', background: editMood === m ? 'rgba(124,58,237,.18)' : 'transparent', border: `1px solid ${editMood === m ? 'rgba(124,58,237,.4)' : cardBd}`, color: editMood === m ? '#c084fc' : ink3, fontFamily: "'DM Sans',sans-serif" }}>{m}</button>
                   ))}
                 </div>
+
+                {/* Collection picker */}
+                <div style={{ fontSize: 11, color: ink3, marginBottom: 8, letterSpacing: '.06em' }}>Collection</div>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 24 }}>
+                  <button onClick={() => setEditCollectionId(null)} style={{ padding: '4px 14px', borderRadius: 50, fontSize: 11, cursor: 'pointer', background: editCollectionId === null ? 'rgba(16,185,129,.12)' : 'transparent', border: `1px solid ${editCollectionId === null ? 'rgba(16,185,129,.4)' : cardBd}`, color: editCollectionId === null ? '#10b981' : ink3, fontFamily: "'DM Sans',sans-serif" }}>None</button>
+                  {collections.map(c => (
+                    <button key={c.id} onClick={() => setEditCollectionId(c.id)} style={{ padding: '4px 14px', borderRadius: 50, fontSize: 11, cursor: 'pointer', background: editCollectionId === c.id ? 'rgba(16,185,129,.12)' : 'transparent', border: `1px solid ${editCollectionId === c.id ? 'rgba(16,185,129,.4)' : cardBd}`, color: editCollectionId === c.id ? '#10b981' : ink3, fontFamily: "'DM Sans',sans-serif" }}>📚 {c.name}</button>
+                  ))}
+                  {collections.length === 0 && <span style={{ fontSize: 11, color: ink3, fontStyle: 'italic' }}>No collections yet</span>}
+                </div>
+
                 <div style={{ display: 'flex', gap: 10 }}>
                   <button onClick={() => setEditing(false)} style={{ flex: 1, padding: '11px', borderRadius: 12, border: `1px solid ${cardBd}`, background: 'transparent', color: ink3, fontSize: 13, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>Cancel</button>
                   <button onClick={saveEdit} disabled={saving} style={{ flex: 2, padding: '11px', borderRadius: 12, border: 'none', background: saving ? 'rgba(124,58,237,.4)' : 'linear-gradient(135deg,#a855f7,#7c3aed)', color: '#fff', fontSize: 13, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>{saving ? 'Saving…' : 'Save changes'}</button>
@@ -198,7 +212,15 @@ export function PageLibrary({ night }: Props) {
               </div>
             ) : (
               <>
-                {selected.mood && <div style={{ fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: '#c084fc', marginBottom: 14 }}>{selected.mood}</div>}
+                {/* Tags row */}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+                  {selected.mood && <div style={{ fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: '#c084fc' }}>{selected.mood}</div>}
+                  {selected.collectionId && collectionName(selected.collectionId) && (
+                    <div style={{ fontSize: 10, padding: '2px 10px', borderRadius: 50, background: 'rgba(16,185,129,.08)', color: '#10b981', border: '1px solid rgba(16,185,129,.2)' }}>
+                      📚 {collectionName(selected.collectionId)}
+                    </div>
+                  )}
+                </div>
                 <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 400, color: ink, letterSpacing: '-.02em', lineHeight: 1.3, marginBottom: 28 }}>{selected.title}</div>
                 <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 17, fontStyle: 'italic', fontWeight: 300, color: ink2, lineHeight: 2.2, whiteSpace: 'pre-wrap' }}>{selected.body}</div>
                 <div style={{ marginTop: 32, paddingTop: 20, borderTop: `1px solid ${cardBd}`, fontSize: 11, color: ink3, fontWeight: 300 }}>

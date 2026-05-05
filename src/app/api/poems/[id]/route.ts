@@ -40,7 +40,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
       slug,
       coverImageUrl: body.coverImageUrl ?? poem.coverImageUrl,
       authorNote:    body.authorNote   ?? poem.authorNote,
-      collectionId:  body.collectionId ?? poem.collectionId,
+      collectionId:  'collectionId' in body ? body.collectionId : poem.collectionId,
       updatedAt: new Date().toISOString(),
     }).where(eq(poems.id, id)).returning();
 

@@ -1,10 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserId } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { collections } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { collections, poems } from "@/lib/db/schema";
+import { eq, and, desc } from "drizzle-orm";
 
 type Params = { params: Promise<{ id: string }> };
+
+export async function GET(_req: NextRequest, { params }: Params) {
+  try {
+    const userId = await getUserId();
+    const { id } = await params;
+    const col = await db.select().from(collections).where(and(eq(collections.id, id), eq(collections.userId, userId))).get();
+    if (!col) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const colPoems = await db.select().from(poems)
+      .where(and(eq(poems.userId, userId), eq(poems.collectionId, id)))
+      .orderBy(desc(poems.createdAt)).all();
+    return NextResponse.json({ ...col, poems: colPoems });
+  } catch (e) {
+    if (e instanceof NextResponse) return e;
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
 
 export async function PUT(req: NextRequest, { params }: Params) {
   try {
@@ -33,6 +49,8 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     const { id } = await params;
     const col = await db.select().from(collections).where(and(eq(collections.id, id), eq(collections.userId, userId))).get();
     if (!col) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    // Unlink poems before deleting
+    await db.update(poems).set({ collectionId: null }).where(and(eq(poems.userId, userId), eq(poems.collectionId, id)));
     await db.delete(collections).where(eq(collections.id, id));
     return NextResponse.json({ success: true });
   } catch (e) {
