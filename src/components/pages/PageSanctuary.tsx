@@ -1,9 +1,11 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useMuseStore } from '@/lib/store';
 
 interface Props { night: boolean; }
 
 export function PageSanctuary({ night }: Props) {
+  const { sanctuaryDraft, clearDraft } = useMuseStore();
   const [text, setText] = useState('');
   const [title, setTitle] = useState('');
   const [mood, setMood] = useState('Reflective');
@@ -12,6 +14,13 @@ export function PageSanctuary({ night }: Props) {
   const [error, setError] = useState('');
   const n = night;
   const moods = ['Reflective', 'Melancholic', 'Peaceful', 'Hopeful'];
+
+  useEffect(() => {
+    if (sanctuaryDraft) {
+      setText(sanctuaryDraft.body);
+      clearDraft();
+    }
+  }, []);
 
   async function handleSave() {
     if (!title.trim() || !text.trim()) {

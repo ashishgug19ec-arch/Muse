@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { useMuseStore } from '@/lib/store';
 
 interface Props { night: boolean; }
 
@@ -67,6 +68,8 @@ export function PageIkigai({ night }: Props) {
   const [reflection, setReflection] = useState('');
   const [reflSaving, setReflSaving] = useState(false);
   const reflRef = useRef<HTMLTextAreaElement>(null);
+
+  const { openSanctuary } = useMuseStore();
 
   const ink  = night ? 'rgba(230,220,255,.9)'  : '#1e1628';
   const ink2 = night ? 'rgba(200,180,255,.7)'  : '#4a3960';
@@ -316,11 +319,18 @@ export function PageIkigai({ night }: Props) {
                       <div style={{ fontSize: 11, color: ink3, fontStyle: 'italic', marginBottom: 4, fontFamily: "'DM Sans',sans-serif" }}>{e.promptText}</div>
                       <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, fontStyle: 'italic', color: ink2, lineHeight: 1.6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{e.response}</div>
                     </div>
-                    <button
-                      onClick={() => deleteEntry(e.id)}
-                      style={{ fontSize: 12, color: '#e05080', background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0, opacity: .5 }}
-                      title="Delete"
-                    >✕</button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+                      <button
+                        onClick={() => openSanctuary({ body: e.response })}
+                        title="Turn into poem"
+                        style={{ fontSize: 10, color: '#c084fc', background: 'rgba(192,132,252,.1)', border: '1px solid rgba(192,132,252,.3)', borderRadius: 6, cursor: 'pointer', padding: '3px 8px', fontFamily: "'DM Sans',sans-serif", whiteSpace: 'nowrap' }}
+                      >→ Poem</button>
+                      <button
+                        onClick={() => deleteEntry(e.id)}
+                        style={{ fontSize: 12, color: '#e05080', background: 'none', border: 'none', cursor: 'pointer', padding: 0, opacity: .5, textAlign: 'center' }}
+                        title="Delete"
+                      >✕</button>
+                    </div>
                   </div>
                 ))}
               </div>
