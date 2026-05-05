@@ -11,7 +11,7 @@ const PAGES = [
     { icon: '⊞', label: 'Fan Fiction'    },
     { icon: '◈', label: 'Collections'    },
     { icon: '✦', label: 'Scraps'         },
-    { icon: '◉', label: 'Ikigai Journal' },
+    // { icon: '◉', label: 'Ikigai Journal' },
   ]},
   { section: 'Account', items: [
     { icon: '◉', label: 'Profile'  },
