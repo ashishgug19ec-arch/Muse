@@ -62,7 +62,7 @@ export function AppOverlay() {
 
       {/* ── Header ─────────────────────────────────────────────────── */}
       <header style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center',
         padding: '14px 32px',
         borderBottom: `1px solid ${borderCol}`,
         backdropFilter: 'blur(20px)',
@@ -117,7 +117,7 @@ export function AppOverlay() {
         </nav>
 
         {/* Right: night toggle + close */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
           <button onClick={toggleNight} title="Toggle night mode" style={{
             width: 34, height: 34, borderRadius: '50%',
             border: `1px solid ${borderCol}`,
