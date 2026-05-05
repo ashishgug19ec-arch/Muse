@@ -1,16 +1,12 @@
 import { db } from "./db";
-import { userStats, poems } from "./db/schema";
+import { userStats, poems, chapters } from "./db/schema";
 import { eq, gte, lt, and } from "drizzle-orm";
 
 export interface DayActivity {
   label: string;
-  active: boolean;
+  count: number;
 }
 
-/**
- * Updates writing streak after a new poem is saved.
- * Handles streak increment, reset, monthly goal, and longest streak.
- */
 export async function updateStreak(userId: string): Promise<void> {
   const stats = await db
     .select()
@@ -37,7 +33,6 @@ export async function updateStreak(userId: string): Promise<void> {
 
   const longestStreak = Math.max(stats.longestStreak, currentStreak);
 
-  // Check monthly reset
   const resetAt = stats.monthlyResetAt ? new Date(stats.monthlyResetAt) : null;
   const needsReset = !resetAt || resetAt.getMonth() !== now.getMonth() || resetAt.getFullYear() !== now.getFullYear();
 
@@ -54,37 +49,30 @@ export async function updateStreak(userId: string): Promise<void> {
     .where(eq(userStats.userId, userId));
 }
 
-/**
- * Returns last 7 days of writing activity as labeled booleans.
- */
 export async function getWeekActivity(userId: string): Promise<DayActivity[]> {
-  const labels = ["S", "M", "T", "W", "T", "F", "S"];
+  const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   const result: DayActivity[] = [];
 
   for (let i = 6; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
     const dayStart = date.toISOString().slice(0, 10);
-
     const nextDay = new Date(date);
     nextDay.setDate(nextDay.getDate() + 1);
     const dayEnd = nextDay.toISOString().slice(0, 10);
 
-    const wrote = await db
-      .select({ id: poems.id })
-      .from(poems)
-      .where(
-        and(
-          eq(poems.userId, userId),
-          gte(poems.createdAt, dayStart),
-          lt(poems.createdAt, dayEnd)
-        )
-      )
-      .get();
+    const [poemRows, chapterRows] = await Promise.all([
+      db.select({ id: poems.id }).from(poems).where(
+        and(eq(poems.userId, userId), gte(poems.createdAt, dayStart), lt(poems.createdAt, dayEnd))
+      ).all(),
+      db.select({ id: chapters.id }).from(chapters).where(
+        and(eq(chapters.userId, userId), gte(chapters.createdAt, dayStart), lt(chapters.createdAt, dayEnd))
+      ).all(),
+    ]);
 
     result.push({
-      label: labels[date.getDay()],
-      active: !!wrote,
+      label: DAY_LABELS[date.getDay()],
+      count: poemRows.length + chapterRows.length,
     });
   }
 

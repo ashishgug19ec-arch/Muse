@@ -7,9 +7,12 @@ import { useMuseStore } from '@/lib/store';
 interface Props { night: boolean; }
 
 interface DashboardData {
-  stats: { currentStreak: number; totalPoems: number; totalReaders: number } | null;
+  totalPoems: number;
+  totalFanfics: number;
+  totalCollections: number;
+  currentStreak: number;
   recentPoems: { id: string; title: string; createdAt: string }[];
-  weekActivity: { date: string; count: number }[];
+  weekActivity: { label: string; count: number }[];
   dailyPrompt: string;
 }
 
@@ -43,15 +46,13 @@ export function PageDashboard({ night }: Props) {
       .catch(() => {});
   }, []);
 
-  const s = data?.stats;
   const statCards = [
-    { label: 'Poems',       val: s ? fmt(s.totalPoems)    : '—', color: '#c084fc' },
-    { label: 'Streak',      val: s ? `${s.currentStreak}d`: '—', color: '#f0a8c0' },
-    { label: 'Collections', val: '—',                            color: '#90b898' },
-    { label: 'Readers',     val: s ? fmt(s.totalReaders)  : '—', color: '#c8a050' },
+    { label: 'Poems',       val: data ? fmt(data.totalPoems)      : '—', color: '#c084fc' },
+    { label: 'Fan Fics',    val: data ? fmt(data.totalFanfics)    : '—', color: '#f472b6' },
+    { label: 'Collections', val: data ? fmt(data.totalCollections) : '—', color: '#90b898' },
+    { label: 'Streak',      val: data ? `${data.currentStreak}d`  : '—', color: '#f0a8c0' },
   ];
 
-  const weekDays = ['S','M','T','W','T','F','S'];
   const weekActivity = data?.weekActivity ?? [];
   const maxCount = Math.max(...weekActivity.map(d => d.count), 1);
 
@@ -94,11 +95,11 @@ export function PageDashboard({ night }: Props) {
             <div style={{ fontSize: 13, color: ink3, fontStyle: 'italic' }}>Loading…</div>
           ) : data.recentPoems.length === 0 ? (
             <div style={{ fontSize: 13, color: ink3, fontStyle: 'italic', fontFamily: "'Playfair Display',serif" }}>No poems yet — write your first one.</div>
-          ) : data.recentPoems.slice(0, 3).map((p, i, arr) => (
+          ) : data.recentPoems.map((p, i, arr) => (
             <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '9px 0', borderBottom: i < arr.length - 1 ? `1px solid ${cardBd}` : 'none' }}>
               <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#c084fc', opacity: .6, flexShrink: 0 }} />
-              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, color: ink2, flex: 1 }}>{p.title}</div>
-              <div style={{ fontSize: 10, color: ink3, fontWeight: 300 }}>
+              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, color: ink2, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</div>
+              <div style={{ fontSize: 10, color: ink3, fontWeight: 300, flexShrink: 0 }}>
                 {new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </div>
             </div>
@@ -108,20 +109,30 @@ export function PageDashboard({ night }: Props) {
 
       {/* Week activity */}
       <div style={{ marginTop: 14, borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 26px' }}>
-        <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, marginBottom: 16 }}>This Week</div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-          {weekDays.map((d, i) => {
-            const count = weekActivity[i]?.count ?? 0;
-            const h = Math.max(20, Math.round((count / maxCount) * 60));
-            const active = count > 0;
-            return (
-              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                <div style={{ width: '100%', height: active ? h : 20, borderRadius: 6, background: active ? 'linear-gradient(180deg,#c084fc,#7c3aed)' : (night ? 'rgba(255,255,255,.08)' : 'rgba(208,191,240,.28)'), transition: 'height .3s' }} />
-                <span style={{ fontSize: 10, color: ink3, fontWeight: 300 }}>{d}</span>
-              </div>
-            );
-          })}
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3 }}>This Week</div>
+          <div style={{ fontSize: 11, color: ink3, fontWeight: 300 }}>
+            {weekActivity.reduce((s, d) => s + d.count, 0)} pieces written
+          </div>
         </div>
+        {data === null ? (
+          <div style={{ fontSize: 13, color: ink3, fontStyle: 'italic' }}>Loading…</div>
+        ) : (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+            {weekActivity.map((d, i) => {
+              const h = d.count > 0 ? Math.max(24, Math.round((d.count / maxCount) * 64)) : 20;
+              return (
+                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                  {d.count > 0 && (
+                    <div style={{ fontSize: 9, color: ink3, fontWeight: 300 }}>{d.count}</div>
+                  )}
+                  <div style={{ width: '100%', height: h, borderRadius: 6, background: d.count > 0 ? 'linear-gradient(180deg,#c084fc,#7c3aed)' : (night ? 'rgba(255,255,255,.08)' : 'rgba(208,191,240,.28)'), transition: 'height .3s' }} />
+                  <span style={{ fontSize: 10, color: ink3, fontWeight: 300 }}>{d.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
