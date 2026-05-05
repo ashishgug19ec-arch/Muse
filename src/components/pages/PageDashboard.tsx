@@ -175,7 +175,7 @@ export function PageDashboard({ night }: Props) {
               const isHovered = hoveredDay === i;
               return (
                 <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, position: 'relative' }}
-                  onMouseEnter={() => !d.future && total > 0 && setHoveredDay(i)}
+                  onMouseEnter={() => !d.future && setHoveredDay(i)}
                   onMouseLeave={() => setHoveredDay(null)}
                 >
                   {/* Tooltip */}
@@ -190,16 +190,12 @@ export function PageDashboard({ night }: Props) {
                       whiteSpace: 'nowrap',
                       pointerEvents: 'none',
                     }}>
-                      {d.poemCount > 0 && (
-                        <div style={{ fontSize: 11, color: '#c084fc', marginBottom: d.fanficCount > 0 ? 3 : 0 }}>
-                          {d.poemCount} poem{d.poemCount !== 1 ? 's' : ''}
-                        </div>
-                      )}
-                      {d.fanficCount > 0 && (
-                        <div style={{ fontSize: 11, color: '#f472b6' }}>
-                          {d.fanficCount} fan fic{d.fanficCount !== 1 ? 's' : ''}
-                        </div>
-                      )}
+                      <div style={{ fontSize: 11, color: '#c084fc', marginBottom: 3 }}>
+                        Poems: {d.poemCount ?? 0}
+                      </div>
+                      <div style={{ fontSize: 11, color: '#f472b6' }}>
+                        Fanfics: {d.fanficCount ?? 0}
+                      </div>
                       <div style={{ position: 'absolute', bottom: -5, left: '50%', transform: 'translateX(-50%)', width: 8, height: 8, background: night ? 'rgba(30,15,50,.96)' : 'rgba(255,252,255,.98)', border: `1px solid ${cardBd}`, borderTop: 'none', borderLeft: 'none', rotate: '45deg' }} />
                     </div>
                   )}
