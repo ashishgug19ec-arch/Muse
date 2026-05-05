@@ -140,50 +140,6 @@ export function AppOverlay() {
         {Page && <Page night={night} />}
       </div>
 
-      {/* ── Footer ─────────────────────────────────────────────────── */}
-      <footer style={{
-        flexShrink: 0,
-        borderTop: `1px solid ${borderCol}`,
-        padding: '20px 40px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        flexWrap: 'wrap', gap: 12,
-      }}>
-        {/* Left: brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <MuseLogo size={22} />
-          <div>
-            <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, color: nameCol, fontWeight: 400 }}>Muse</span>
-            <span style={{ fontSize: 11, color: ink3, marginLeft: 8, fontWeight: 300 }}>garden of poetry</span>
-          </div>
-        </div>
-
-        {/* Center: quick links */}
-        <div style={{ display: 'flex', gap: 20 }}>
-          {[
-            { label: 'Poems', page: 'poems' },
-            { label: 'Fan Fiction', page: 'fan fiction' },
-            { label: 'Collections', page: 'collections' },
-            { label: 'Ikigai', page: 'ikigai journal' },
-            { label: 'Profile', page: 'profile' },
-            { label: 'Settings', page: 'settings' },
-          ].map(l => (
-            <button key={l.label} onClick={() => openPage(l.page)} style={{
-              fontSize: 11, color: ink3, background: 'none', border: 'none',
-              cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", fontWeight: 300,
-              padding: 0, transition: 'color .15s',
-            }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#c084fc')}
-              onMouseLeave={e => (e.currentTarget.style.color = ink3)}
-            >{l.label}</button>
-          ))}
-        </div>
-
-        {/* Right: copyright */}
-        <div style={{ fontSize: 11, color: ink3, fontWeight: 300 }}>
-          © {new Date().getFullYear()} Muse · All rights reserved
-        </div>
-      </footer>
-
     </div>
   );
 }
