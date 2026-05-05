@@ -5,22 +5,17 @@ import { MuseLogo } from './ui/MuseLogo';
 import { useMuseStore } from '@/lib/store';
 
 const PAGES = [
-  { section: 'Writing', items: [
+  { section: 'My Works', items: [
     { icon: '✦', label: 'Dashboard'      },
-    { icon: '◎', label: 'Sanctuary'      },
-  ]},
-  { section: 'My Garden', items: [
-    { icon: '⊞', label: 'My Library'     },
+    { icon: '✐', label: 'Poems'          },
+    { icon: '⊞', label: 'Fan Fiction'    },
     { icon: '◈', label: 'Collections'    },
     { icon: '✦', label: 'Scraps'         },
     { icon: '◉', label: 'Ikigai Journal' },
   ]},
-  { section: 'Fan Fiction', items: [
-    { icon: '✐', label: 'Fan Fiction'    },
-  ]},
   { section: 'Account', items: [
-    { icon: '◉', label: 'Profile'        },
-    { icon: '⊟', label: 'Settings'       },
+    { icon: '◉', label: 'Profile'  },
+    { icon: '⊟', label: 'Settings' },
   ]},
 ];
 
@@ -47,7 +42,6 @@ export function Drawer() {
 
   return (
     <>
-      {/* Backdrop */}
       <div onClick={() => setDrawerOpen(false)} style={{
         position: 'fixed', inset: 0, zIndex: 199,
         background: drawerOpen ? overlayBg : 'transparent',
@@ -57,10 +51,9 @@ export function Drawer() {
         transition: 'background .35s, backdrop-filter .35s',
       }} />
 
-      {/* Panel */}
       <div style={{
         position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 200,
-        width: 270,
+        width: 260,
         background: panelBg,
         backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)',
         borderRight: `1px solid ${borderCol}`,
@@ -69,11 +62,7 @@ export function Drawer() {
         display: 'flex', flexDirection: 'column', overflowY: 'auto',
       }}>
         {/* Header */}
-        <div style={{
-          padding: '22px 24px 16px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          borderBottom: `1px solid ${borderCol}`,
-        }}>
+        <div style={{ padding: '22px 24px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${borderCol}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <MuseLogo />
             <div>
@@ -82,8 +71,7 @@ export function Drawer() {
             </div>
           </div>
           <button onClick={() => setDrawerOpen(false)} style={{
-            width: 30, height: 30, borderRadius: '50%',
-            border: `1px solid ${borderCol}`,
+            width: 30, height: 30, borderRadius: '50%', border: `1px solid ${borderCol}`,
             background: n ? 'rgba(255,255,255,.06)' : 'rgba(255,255,255,.65)',
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 14, color: n ? 'rgba(200,170,255,.7)' : '#8a7aa0',
@@ -92,25 +80,15 @@ export function Drawer() {
 
         {/* User chip */}
         {isLoaded && isSignedIn && (
-          <div style={{
-            margin: '14px 18px', padding: '12px 16px', borderRadius: 16,
-            border: `1px solid ${n ? 'rgba(160,124,200,.22)' : 'rgba(208,191,240,.38)'}`,
-            background: n ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.58)',
-            display: 'flex', alignItems: 'center', gap: 12,
-          }}>
-            <div style={{
-              width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
-              background: 'linear-gradient(135deg,#c084fc,#7c3aed)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 16, color: '#fff', fontWeight: 600,
-            }}>
+          <div style={{ margin: '14px 18px', padding: '12px 16px', borderRadius: 16, border: `1px solid ${n ? 'rgba(160,124,200,.22)' : 'rgba(208,191,240,.38)'}`, background: n ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.58)', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg,#c084fc,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, color: '#fff', fontWeight: 600 }}>
               {user?.firstName?.[0] ?? user?.emailAddresses?.[0]?.emailAddress?.[0]?.toUpperCase() ?? '🌸'}
             </div>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 13, color: nameCol, fontWeight: 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div style={{ fontSize: 13, color: nameCol, fontWeight: 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user?.firstName ? `${user.firstName}${user.lastName ? ' ' + user.lastName : ''}` : 'My garden'}
               </div>
-              <div style={{ fontSize: 10, color: n ? 'rgba(200,170,255,.6)' : '#8a7aa0', fontWeight: 300, marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div style={{ fontSize: 10, color: n ? 'rgba(200,170,255,.6)' : '#8a7aa0', fontWeight: 300, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user?.emailAddresses?.[0]?.emailAddress}
               </div>
             </div>
@@ -119,24 +97,12 @@ export function Drawer() {
 
         {/* Sign-in prompt */}
         {isLoaded && !isSignedIn && (
-          <div style={{
-            margin: '14px 18px', padding: '14px 16px', borderRadius: 16,
-            border: `1px solid ${n ? 'rgba(160,124,200,.22)' : 'rgba(208,191,240,.38)'}`,
-            background: n ? 'rgba(255,255,255,.04)' : 'rgba(255,255,255,.55)',
-          }}>
+          <div style={{ margin: '14px 18px', padding: '14px 16px', borderRadius: 16, border: `1px solid ${n ? 'rgba(160,124,200,.22)' : 'rgba(208,191,240,.38)'}`, background: n ? 'rgba(255,255,255,.04)' : 'rgba(255,255,255,.55)' }}>
             <div style={{ fontSize: 12, color: nameCol, fontWeight: 400, marginBottom: 4 }}>Not signed in</div>
             <div style={{ fontSize: 11, color: taglineCol, fontWeight: 300, marginBottom: 12 }}>Sign in to access your garden</div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => { setDrawerOpen(false); router.push('/sign-in'); }} style={{
-                flex: 1, padding: '8px', borderRadius: 50,
-                border: `1px solid ${borderCol}`, background: 'transparent',
-                color: '#c084fc', fontSize: 11, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif",
-              }}>Sign in</button>
-              <button onClick={() => { setDrawerOpen(false); router.push('/sign-up'); }} style={{
-                flex: 1, padding: '8px', borderRadius: 50, border: 'none',
-                background: 'linear-gradient(135deg,#c084fc,#7c3aed)',
-                color: '#fff', fontSize: 11, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif",
-              }}>Join Muse</button>
+              <button onClick={() => { setDrawerOpen(false); router.push('/sign-in'); }} style={{ flex: 1, padding: '8px', borderRadius: 50, border: `1px solid ${borderCol}`, background: 'transparent', color: '#c084fc', fontSize: 11, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>Sign in</button>
+              <button onClick={() => { setDrawerOpen(false); router.push('/sign-up'); }} style={{ flex: 1, padding: '8px', borderRadius: 50, border: 'none', background: 'linear-gradient(135deg,#c084fc,#7c3aed)', color: '#fff', fontSize: 11, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>Join Muse</button>
             </div>
           </div>
         )}
@@ -144,7 +110,7 @@ export function Drawer() {
         {/* Nav */}
         <div style={{ flex: 1, padding: '4px 12px 12px' }}>
           {(isSignedIn ? PAGES : []).map(section => (
-            <div key={section.section} style={{ marginBottom: 16 }}>
+            <div key={section.section} style={{ marginBottom: 20 }}>
               <div style={{ fontSize: 9, fontWeight: 400, letterSpacing: '.1em', textTransform: 'uppercase', color: sectionCol, padding: '0 8px', marginBottom: 4 }}>
                 {section.section}
               </div>
@@ -166,16 +132,16 @@ export function Drawer() {
           ))}
         </div>
 
-        {/* Footer CTA */}
+        {/* Footer */}
         <div style={{ padding: '16px 18px 24px', borderTop: `1px solid ${borderCol}` }}>
           {isSignedIn ? (
-            <button onClick={() => handleNav('Sanctuary')} style={{
+            <button onClick={() => { setDrawerOpen(false); openPage('Sanctuary'); }} style={{
               width: '100%', padding: '12px', borderRadius: 50, border: 'none',
               background: 'linear-gradient(135deg,#c084fc,#9b72cf,#7c3aed)', color: '#fff',
               fontSize: 13, cursor: 'pointer',
               fontFamily: "'Playfair Display',serif", letterSpacing: '.05em',
               boxShadow: '0 6px 24px rgba(124,58,237,.32)',
-            }}>Open Sanctuary</button>
+            }}>Begin writing</button>
           ) : (
             <button onClick={() => { setDrawerOpen(false); router.push('/sign-up'); }} style={{
               width: '100%', padding: '12px', borderRadius: 50, border: 'none',

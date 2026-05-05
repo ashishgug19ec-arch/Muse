@@ -13,6 +13,7 @@ import { PageSettings } from './pages/PageSettings';
 const PAGE_MAP: Record<string, React.ComponentType<{ night: boolean }>> = {
   dashboard: PageDashboard,
   sanctuary: PageSanctuary,
+  poems: PageLibrary,
   library: PageLibrary,
   'my library': PageLibrary,
   collections: PageCollections,
