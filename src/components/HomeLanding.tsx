@@ -281,8 +281,9 @@ export default function HomeLanding() {
 
       {/* ══ CTA ══ */}
       <section style={{
+        position: 'relative',
         margin: '40px', borderRadius: 32,
-        background: night ? 'linear-gradient(160deg,#1a1130,#2c1060)' : 'linear-gradient(160deg,rgba(238,230,255,.95),rgba(252,228,240,.9))',
+        background: night ? 'linear-gradient(160deg,#1a1130,#2c1060)' : 'linear-gradient(160deg,#ede8ff,#f7e8f5)',
         border: `1.5px solid ${cardBd}`,
         padding: '80px 60px', textAlign: 'center',
       }}>
@@ -308,17 +309,29 @@ export default function HomeLanding() {
       </section>
 
       {/* ══ FOOTER ══ */}
-      <footer style={{ padding: '48px 60px 36px', borderTop: `1px solid ${cardBd}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <footer style={{
+        position: 'relative',
+        background: night ? 'rgba(20,10,36,.95)' : 'rgba(240,235,255,.98)',
+        borderTop: `1px solid ${cardBd}`,
+        padding: '36px 60px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexWrap: 'wrap', gap: 16,
+      }}>
         <div>
-          <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 20, color: ink, fontWeight: 400, marginBottom: 4 }}>Muse</div>
+          <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 18, color: ink, fontWeight: 400, marginBottom: 3 }}>Muse</div>
           <div style={{ fontSize: 11, color: ink3, fontWeight: 300 }}>A garden of poetry — tended with love.</div>
         </div>
         <div style={{ display: 'flex', gap: 24 }}>
-          {['Explore', 'Pricing', 'Fan Fiction', 'Settings'].map(l => (
-            <button key={l} onClick={() => openPage(l.toLowerCase().replace(' ', '-'))} style={{ fontSize: 12, color: ink3, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", fontWeight: 300 }}>{l}</button>
+          {[
+            { label: 'Poems', page: 'poems' },
+            { label: 'Fan Fiction', page: 'fan fiction' },
+            { label: 'Collections', page: 'collections' },
+            { label: 'Settings', page: 'settings' },
+          ].map(l => (
+            <button key={l.label} onClick={() => openPage(l.page)} style={{ fontSize: 12, color: ink3, background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", fontWeight: 300 }}>{l.label}</button>
           ))}
         </div>
-        <div style={{ fontSize: 11, color: ink3, fontWeight: 300 }}>© 2025 Muse. Made with 🌸</div>
+        <div style={{ fontSize: 11, color: ink3, fontWeight: 300 }}>© {new Date().getFullYear()} Muse · All rights reserved</div>
       </footer>
     </div>
   );
