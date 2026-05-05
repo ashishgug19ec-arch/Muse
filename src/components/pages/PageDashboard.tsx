@@ -58,8 +58,8 @@ export function PageDashboard({ night }: Props) {
 
   const [hoveredDay, setHoveredDay] = useState<number | null>(null);
   const weekActivity = data?.weekActivity ?? [];
-  const maxCount = Math.max(...weekActivity.map(d => d.poemCount + d.fanficCount), 1);
-  const weekTotal = weekActivity.reduce((s, d) => s + d.poemCount + d.fanficCount, 0);
+  const maxCount = Math.max(...weekActivity.map(d => (d.poemCount ?? 0) + (d.fanficCount ?? 0)), 1);
+  const weekTotal = weekActivity.reduce((s, d) => s + (d.poemCount ?? 0) + (d.fanficCount ?? 0), 0);
 
   return (
     <div style={{ padding: '32px 40px', maxWidth: 960, margin: '0 auto' }}>
@@ -170,7 +170,7 @@ export function PageDashboard({ night }: Props) {
         ) : (
           <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
             {weekActivity.map((d, i) => {
-              const total = d.poemCount + d.fanficCount;
+              const total = (d.poemCount ?? 0) + (d.fanficCount ?? 0);
               const h = total > 0 ? Math.max(24, Math.round((total / maxCount) * 64)) : 20;
               const isHovered = hoveredDay === i;
               return (
