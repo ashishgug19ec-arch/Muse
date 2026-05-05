@@ -112,7 +112,7 @@ export function PageLibrary({ night }: Props) {
         <div style={{ textAlign: 'center', paddingTop: 60 }}>
           <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 20, color: ink2, fontWeight: 300, marginBottom: 10 }}>Your garden is empty</div>
           <div style={{ fontSize: 13, color: ink3, fontWeight: 300, marginBottom: 28 }}>Write your first poem to see it here.</div>
-          <button onClick={() => openPage('Sanctuary')} style={{ padding: '11px 28px', borderRadius: 50, border: 'none', background: 'linear-gradient(135deg,#c084fc,#7c3aed)', color: '#fff', fontSize: 13, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif' " }}>Begin writing →</button>
+          <button onClick={() => openPage('Sanctuary')} style={{ padding: '11px 28px', borderRadius: 50, border: 'none', background: 'linear-gradient(135deg,#c084fc,#7c3aed)', color: '#fff', fontSize: 13, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>Begin writing →</button>
         </div>
       ) : (
         <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', overflow: 'hidden' }}>
