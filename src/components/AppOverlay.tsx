@@ -1,5 +1,6 @@
 'use client';
 import { useMuseStore } from '@/lib/store';
+import { MuseLogo } from './ui/MuseLogo';
 import { PageDashboard } from './pages/PageDashboard';
 import { PageSanctuary } from './pages/PageSanctuary';
 import { PageLibrary } from './pages/PageLibrary';
@@ -27,8 +28,15 @@ const PAGE_MAP: Record<string, React.ComponentType<{ night: boolean }>> = {
   settings: PageSettings,
 };
 
+const NAV_LINKS = [
+  { label: 'Dashboard',   page: 'dashboard' },
+  { label: 'Poems',       page: 'poems' },
+  { label: 'Fan Fiction', page: 'fan fiction' },
+  { label: 'Collections', page: 'collections' },
+];
+
 export function AppOverlay() {
-  const { activePage, closePage, night } = useMuseStore();
+  const { activePage, closePage, night, toggleNight, openPage } = useMuseStore();
   const pageKey = activePage?.toLowerCase() ?? '';
   const Page = pageKey ? PAGE_MAP[pageKey] : null;
 
@@ -38,6 +46,11 @@ export function AppOverlay() {
     ? 'linear-gradient(160deg,#1a0c2e 0%,#0f0620 100%)'
     : 'linear-gradient(160deg,rgba(248,244,255,.98) 0%,rgba(255,243,250,.97) 100%)';
 
+  const borderCol = night ? 'rgba(160,124,200,.18)' : 'rgba(208,191,240,.4)';
+  const ink3 = night ? 'rgba(160,140,200,.55)' : '#8a7aa0';
+  const nameCol = night ? 'rgba(240,230,255,.9)' : '#1e1628';
+  const linkCol = night ? 'rgba(200,170,255,.7)' : '#8a7aa0';
+
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 200,
@@ -46,37 +59,131 @@ export function AppOverlay() {
       display: 'flex', flexDirection: 'column',
       overflowY: 'auto',
     }}>
-      {/* Top bar */}
-      <div style={{
+
+      {/* ── Header ─────────────────────────────────────────────────── */}
+      <header style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '18px 28px',
-        borderBottom: `1px solid ${night ? 'rgba(160,124,200,.18)' : 'rgba(208,191,240,.4)'}`,
+        padding: '14px 32px',
+        borderBottom: `1px solid ${borderCol}`,
+        backdropFilter: 'blur(20px)',
         flexShrink: 0,
+        position: 'sticky', top: 0, zIndex: 10,
+        background: bg,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        {/* Left: back + logo + page name */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <button onClick={closePage} style={{
             width: 34, height: 34, borderRadius: '50%',
-            border: `1px solid ${night ? 'rgba(160,124,200,.3)' : 'rgba(208,191,240,.6)'}`,
+            border: `1px solid ${borderCol}`,
             background: 'transparent', cursor: 'pointer', fontSize: 16,
             color: night ? 'rgba(200,180,255,.7)' : '#8a7aa0',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }} aria-label="Close">←</button>
-          <span style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: night ? 'rgba(160,140,200,.55)' : '#8a7aa0' }}>
-            {activePage?.replace(/-/g, ' ')}
+            flexShrink: 0,
+          }} aria-label="Back">←</button>
+
+          <button onClick={() => openPage('dashboard')} style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+            <MuseLogo size={30} />
+            <div style={{ textAlign: 'left' }}>
+              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, color: nameCol, fontWeight: 400, letterSpacing: '-.01em', lineHeight: 1 }}>Muse</div>
+              <div style={{ fontSize: 9, color: ink3, letterSpacing: '.12em', fontWeight: 300, marginTop: 2 }}>garden of poetry</div>
+            </div>
+          </button>
+
+          <div style={{ width: 1, height: 20, background: borderCol, margin: '0 4px' }} />
+
+          <span style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3 }}>
+            {activePage.replace(/-/g, ' ')}
           </span>
         </div>
-        <button onClick={closePage} style={{
-          width: 28, height: 28, borderRadius: '50%',
-          border: `1px solid ${night ? 'rgba(160,124,200,.3)' : 'rgba(208,191,240,.5)'}`,
-          background: 'transparent', cursor: 'pointer', fontSize: 14,
-          color: night ? 'rgba(200,180,255,.6)' : '#8a7aa0',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }} aria-label="Close">✕</button>
-      </div>
 
+        {/* Center: quick nav links */}
+        <nav style={{ display: 'flex', gap: 4 }}>
+          {NAV_LINKS.map(l => {
+            const isActive = pageKey === l.page || pageKey === l.label.toLowerCase();
+            return (
+              <button key={l.label} onClick={() => openPage(l.page)} style={{
+                padding: '6px 14px', borderRadius: 50, fontSize: 12,
+                background: isActive ? (night ? 'rgba(192,132,252,.15)' : 'rgba(192,132,252,.1)') : 'transparent',
+                border: isActive ? `1px solid rgba(192,132,252,.35)` : '1px solid transparent',
+                color: isActive ? '#c084fc' : linkCol,
+                cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", fontWeight: 300,
+                transition: 'all .15s',
+              }}
+                onMouseEnter={e => { if (!isActive) { e.currentTarget.style.color = '#c084fc'; e.currentTarget.style.background = night ? 'rgba(192,132,252,.08)' : 'rgba(192,132,252,.06)'; } }}
+                onMouseLeave={e => { if (!isActive) { e.currentTarget.style.color = linkCol; e.currentTarget.style.background = 'transparent'; } }}
+              >{l.label}</button>
+            );
+          })}
+        </nav>
+
+        {/* Right: night toggle + close */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={toggleNight} title="Toggle night mode" style={{
+            width: 34, height: 34, borderRadius: '50%',
+            border: `1px solid ${borderCol}`,
+            background: night ? 'rgba(255,255,255,.08)' : 'rgba(255,255,255,.65)',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15,
+          }}>{night ? '☀️' : '🌙'}</button>
+
+          <button onClick={closePage} style={{
+            width: 34, height: 34, borderRadius: '50%',
+            border: `1px solid ${borderCol}`,
+            background: 'transparent', cursor: 'pointer', fontSize: 16,
+            color: night ? 'rgba(200,180,255,.6)' : '#8a7aa0',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }} aria-label="Close">✕</button>
+        </div>
+      </header>
+
+      {/* ── Page content ────────────────────────────────────────────── */}
       <div style={{ flex: 1 }}>
         {Page && <Page night={night} />}
       </div>
+
+      {/* ── Footer ─────────────────────────────────────────────────── */}
+      <footer style={{
+        flexShrink: 0,
+        borderTop: `1px solid ${borderCol}`,
+        padding: '20px 40px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexWrap: 'wrap', gap: 12,
+      }}>
+        {/* Left: brand */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <MuseLogo size={22} />
+          <div>
+            <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, color: nameCol, fontWeight: 400 }}>Muse</span>
+            <span style={{ fontSize: 11, color: ink3, marginLeft: 8, fontWeight: 300 }}>garden of poetry</span>
+          </div>
+        </div>
+
+        {/* Center: quick links */}
+        <div style={{ display: 'flex', gap: 20 }}>
+          {[
+            { label: 'Poems', page: 'poems' },
+            { label: 'Fan Fiction', page: 'fan fiction' },
+            { label: 'Collections', page: 'collections' },
+            { label: 'Ikigai', page: 'ikigai journal' },
+            { label: 'Profile', page: 'profile' },
+            { label: 'Settings', page: 'settings' },
+          ].map(l => (
+            <button key={l.label} onClick={() => openPage(l.page)} style={{
+              fontSize: 11, color: ink3, background: 'none', border: 'none',
+              cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", fontWeight: 300,
+              padding: 0, transition: 'color .15s',
+            }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#c084fc')}
+              onMouseLeave={e => (e.currentTarget.style.color = ink3)}
+            >{l.label}</button>
+          ))}
+        </div>
+
+        {/* Right: copyright */}
+        <div style={{ fontSize: 11, color: ink3, fontWeight: 300 }}>
+          © {new Date().getFullYear()} Muse · All rights reserved
+        </div>
+      </footer>
+
     </div>
   );
 }
