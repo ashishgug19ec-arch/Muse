@@ -11,8 +11,10 @@ interface DashboardData {
   totalFanfics: number;
   totalCollections: number;
   currentStreak: number;
-  monthDays: number;
-  yearDays: number;
+  monthPoems: number;
+  monthFanfics: number;
+  yearPoems: number;
+  yearFanfics: number;
   recentPoems: { id: string; title: string; createdAt: string }[];
   recentFanfics: { id: string; title: string; fandom: string | null; status: string; chapterCount: number; createdAt: string }[];
   weekActivity: { label: string; poemCount: number; fanficCount: number; future: boolean }[];
@@ -35,6 +37,7 @@ export function PageDashboard({ night }: Props) {
   const { openPage: onNav } = useMuseStore();
   const { user } = useUser();
   const [data, setData] = useState<DashboardData | null>(null);
+  const [hoveredDay, setHoveredDay] = useState<number | null>(null);
 
   const ink  = night ? 'rgba(230,220,255,.9)'  : '#1e1628';
   const ink2 = night ? 'rgba(200,180,255,.7)'  : '#4a3960';
@@ -50,19 +53,27 @@ export function PageDashboard({ night }: Props) {
   }, []);
 
   const statCards = [
-    { label: 'Poems',      val: data ? fmt(data.totalPoems)   : '—', color: '#c084fc', sub: 'total' },
-    { label: 'Fan Fics',   val: data ? fmt(data.totalFanfics) : '—', color: '#f472b6', sub: 'total' },
-    { label: 'This Month', val: data ? `${data.monthDays}d`   : '—', color: '#90c8a8', sub: 'days written' },
-    { label: 'This Year',  val: data ? `${data.yearDays}d`    : '—', color: '#f0a8c0', sub: 'days written' },
+    { label: 'Poems',       val: data ? fmt(data.totalPoems)       : '—', color: '#c084fc' },
+    { label: 'Fan Fics',    val: data ? fmt(data.totalFanfics)     : '—', color: '#f472b6' },
+    { label: 'Collections', val: data ? fmt(data.totalCollections) : '—', color: '#90c8a8' },
+    { label: 'Day Streak',  val: data ? `${data.currentStreak}d`   : '—', color: '#f0a8c0' },
   ];
 
-  const [hoveredDay, setHoveredDay] = useState<number | null>(null);
   const weekActivity = data?.weekActivity ?? [];
   const maxCount = Math.max(...weekActivity.map(d => (d.poemCount ?? 0) + (d.fanficCount ?? 0)), 1);
   const weekTotal = weekActivity.reduce((s, d) => s + (d.poemCount ?? 0) + (d.fanficCount ?? 0), 0);
+  const weekPoems = weekActivity.reduce((s, d) => s + (d.poemCount ?? 0), 0);
+  const weekFanfics = weekActivity.reduce((s, d) => s + (d.fanficCount ?? 0), 0);
+
+  const activityCols = [
+    { label: 'This Week',  poems: weekPoems,           fanfics: weekFanfics },
+    { label: 'This Month', poems: data?.monthPoems ?? 0, fanfics: data?.monthFanfics ?? 0 },
+    { label: 'This Year',  poems: data?.yearPoems ?? 0,  fanfics: data?.yearFanfics ?? 0 },
+  ];
 
   return (
     <div style={{ padding: '32px 40px', maxWidth: 960, margin: '0 auto' }}>
+
       {/* Greeting */}
       <div style={{ marginBottom: 28 }}>
         <div style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, marginBottom: 8 }}>Dashboard</div>
@@ -74,21 +85,19 @@ export function PageDashboard({ night }: Props) {
         </div>
       </div>
 
-      {/* Stat cards */}
+      {/* Stat cards: Poems | Fan Fics | Collections | Streak */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 20 }}>
         {statCards.map(s => (
           <Tilt key={s.label} style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '20px 22px' }}>
             <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 38, fontWeight: 300, color: ink, letterSpacing: '-.04em', lineHeight: 1 }}>{s.val}</div>
-            <div style={{ fontSize: 11, color: ink3, fontWeight: 300, marginTop: 6, letterSpacing: '.06em' }}>{s.label}</div>
-            <div style={{ fontSize: 9, color: ink3, opacity: .7, marginTop: 2 }}>{s.sub}</div>
-            <div style={{ height: 3, borderRadius: 50, background: `linear-gradient(90deg,${s.color},transparent)`, marginTop: 8, opacity: .6 }} />
+            <div style={{ fontSize: 11, color: ink3, fontWeight: 300, marginTop: 8, letterSpacing: '.06em' }}>{s.label}</div>
+            <div style={{ height: 3, borderRadius: 50, background: `linear-gradient(90deg,${s.color},transparent)`, marginTop: 10, opacity: .6 }} />
           </Tilt>
         ))}
       </div>
 
-      {/* Streak + daily prompt */}
+      {/* Streak badge + Daily prompt */}
       <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 14, marginBottom: 14 }}>
-        {/* Streak badge */}
         <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: night ? 'rgba(192,132,252,.08)' : 'rgba(192,132,252,.06)', padding: '20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minWidth: 120 }}>
           <div style={{ fontSize: 42, fontFamily: "'Playfair Display',serif", fontWeight: 300, color: '#c084fc', lineHeight: 1 }}>
             {data ? data.currentStreak : '—'}
@@ -99,7 +108,6 @@ export function PageDashboard({ night }: Props) {
           )}
         </div>
 
-        {/* Daily prompt */}
         <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: night ? 'rgba(208,100,136,.1)' : 'linear-gradient(148deg,rgba(252,228,240,.9),rgba(238,230,255,.75))', padding: '24px 26px' }}>
           <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: '#d06888', marginBottom: 10 }}>Daily Prompt</div>
           <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 17, fontStyle: 'italic', fontWeight: 300, color: ink2, lineHeight: 1.8 }}>
@@ -111,7 +119,6 @@ export function PageDashboard({ night }: Props) {
 
       {/* Recent Poems + Recent Fan Fics */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-        {/* Recent Poems */}
         <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3 }}>Recent Poems</div>
@@ -132,7 +139,6 @@ export function PageDashboard({ night }: Props) {
           ))}
         </div>
 
-        {/* Recent Fan Fics */}
         <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3 }}>Recent Fan Fics</div>
@@ -157,7 +163,62 @@ export function PageDashboard({ night }: Props) {
         </div>
       </div>
 
-      {/* Week activity (Sun → Sat) */}
+      {/* Writing Activity: Week / Month / Year breakdown */}
+      <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 26px', marginBottom: 14 }}>
+        <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, marginBottom: 18 }}>Your Writing</div>
+
+        {/* Header row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr 1fr', gap: 0, marginBottom: 10 }}>
+          <div />
+          {activityCols.map(c => (
+            <div key={c.label} style={{ fontSize: 9, letterSpacing: '.08em', textTransform: 'uppercase', color: ink3, textAlign: 'center', fontWeight: 400 }}>{c.label}</div>
+          ))}
+        </div>
+
+        {/* Poems row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr 1fr', gap: 0, padding: '10px 0', borderTop: `1px solid ${cardBd}` }}>
+          <div style={{ fontSize: 11, color: '#c084fc', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#c084fc' }} />
+            Poems
+          </div>
+          {activityCols.map(c => (
+            <div key={c.label} style={{ textAlign: 'center' }}>
+              <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 300, color: ink, lineHeight: 1 }}>
+                {data === null ? '—' : c.poems}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Fanfics row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr 1fr', gap: 0, padding: '10px 0', borderTop: `1px solid ${cardBd}` }}>
+          <div style={{ fontSize: 11, color: '#f472b6', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#f472b6' }} />
+            Fanfics
+          </div>
+          {activityCols.map(c => (
+            <div key={c.label} style={{ textAlign: 'center' }}>
+              <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 300, color: ink, lineHeight: 1 }}>
+                {data === null ? '—' : c.fanfics}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Total row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr 1fr', gap: 0, padding: '10px 0', borderTop: `1px solid ${cardBd}` }}>
+          <div style={{ fontSize: 11, color: ink3, display: 'flex', alignItems: 'center' }}>Total</div>
+          {activityCols.map(c => (
+            <div key={c.label} style={{ textAlign: 'center' }}>
+              <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 300, color: '#a855f7', lineHeight: 1 }}>
+                {data === null ? '—' : c.poems + c.fanfics}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Week bar chart — Sun → Sat */}
       <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 26px' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 16 }}>
           <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3 }}>This Week</div>
@@ -178,7 +239,6 @@ export function PageDashboard({ night }: Props) {
                   onMouseEnter={() => !d.future && setHoveredDay(i)}
                   onMouseLeave={() => setHoveredDay(null)}
                 >
-                  {/* Tooltip */}
                   {isHovered && (
                     <div style={{
                       position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)',
@@ -190,19 +250,12 @@ export function PageDashboard({ night }: Props) {
                       whiteSpace: 'nowrap',
                       pointerEvents: 'none',
                     }}>
-                      <div style={{ fontSize: 11, color: '#c084fc', marginBottom: 3 }}>
-                        Poems: {d.poemCount ?? 0}
-                      </div>
-                      <div style={{ fontSize: 11, color: '#f472b6' }}>
-                        Fanfics: {d.fanficCount ?? 0}
-                      </div>
+                      <div style={{ fontSize: 11, color: '#c084fc', marginBottom: 3 }}>Poems: {d.poemCount ?? 0}</div>
+                      <div style={{ fontSize: 11, color: '#f472b6' }}>Fanfics: {d.fanficCount ?? 0}</div>
                       <div style={{ position: 'absolute', bottom: -5, left: '50%', transform: 'translateX(-50%)', width: 8, height: 8, background: night ? 'rgba(30,15,50,.96)' : 'rgba(255,252,255,.98)', border: `1px solid ${cardBd}`, borderTop: 'none', borderLeft: 'none', rotate: '45deg' }} />
                     </div>
                   )}
-
-                  {total > 0 && (
-                    <div style={{ fontSize: 9, color: ink3, fontWeight: 300 }}>{total}</div>
-                  )}
+                  {total > 0 && <div style={{ fontSize: 9, color: ink3, fontWeight: 300 }}>{total}</div>}
                   <div style={{
                     width: '100%', height: h, borderRadius: 6,
                     background: d.future
@@ -212,7 +265,6 @@ export function PageDashboard({ night }: Props) {
                         : (night ? 'rgba(255,255,255,.08)' : 'rgba(208,191,240,.28)'),
                     opacity: d.future ? 0.4 : 1,
                     transition: 'height .3s',
-                    cursor: total > 0 ? 'default' : 'default',
                   }} />
                   <span style={{ fontSize: 10, color: ink3, fontWeight: 300, opacity: d.future ? 0.4 : 1 }}>{d.label}</span>
                 </div>
@@ -221,6 +273,7 @@ export function PageDashboard({ night }: Props) {
           </div>
         )}
       </div>
+
     </div>
   );
 }

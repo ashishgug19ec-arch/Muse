@@ -3,25 +3,25 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from "next/server";
 import { getUserId } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { poems, fanfics, collections, userStats } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
-import { getWeekActivity, countWritingDays } from "@/lib/streak";
+import { poems, fanfics, chapters, collections, userStats } from "@/lib/db/schema";
+import { eq, desc, gte, and } from "drizzle-orm";
+import { getWeekActivity } from "@/lib/streak";
 import { getDailyPrompt } from "@/lib/prompts";
 
-function isoMonthStart() {
+function localMonthStart() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
 }
 
-function isoYearStart() {
+function localYearStart() {
   return `${new Date().getFullYear()}-01-01`;
 }
 
 export async function GET() {
   try {
     const userId = await getUserId();
-    const monthStart = isoMonthStart();
-    const yearStart = isoYearStart();
+    const monthStart = localMonthStart();
+    const yearStart = localYearStart();
 
     const [
       allPoems,
@@ -31,8 +31,12 @@ export async function GET() {
       recentPoems,
       recentFanfics,
       weekActivity,
-      monthDays,
-      yearDays,
+      monthPoemRows,
+      monthFanficRows,
+      monthChapterRows,
+      yearPoemRows,
+      yearFanficRows,
+      yearChapterRows,
     ] = await Promise.all([
       db.select({ id: poems.id }).from(poems).where(eq(poems.userId, userId)).all(),
       db.select({ id: fanfics.id }).from(fanfics).where(eq(fanfics.userId, userId)).all(),
@@ -43,8 +47,12 @@ export async function GET() {
       db.select({ id: fanfics.id, title: fanfics.title, fandom: fanfics.fandom, status: fanfics.status, chapterCount: fanfics.chapterCount, createdAt: fanfics.createdAt })
         .from(fanfics).where(eq(fanfics.userId, userId)).orderBy(desc(fanfics.createdAt)).limit(5).all(),
       getWeekActivity(userId),
-      countWritingDays(userId, monthStart),
-      countWritingDays(userId, yearStart),
+      db.select({ id: poems.id }).from(poems).where(and(eq(poems.userId, userId), gte(poems.createdAt, monthStart))).all(),
+      db.select({ id: fanfics.id }).from(fanfics).where(and(eq(fanfics.userId, userId), gte(fanfics.createdAt, monthStart))).all(),
+      db.select({ id: chapters.id }).from(chapters).where(and(eq(chapters.userId, userId), gte(chapters.createdAt, monthStart))).all(),
+      db.select({ id: poems.id }).from(poems).where(and(eq(poems.userId, userId), gte(poems.createdAt, yearStart))).all(),
+      db.select({ id: fanfics.id }).from(fanfics).where(and(eq(fanfics.userId, userId), gte(fanfics.createdAt, yearStart))).all(),
+      db.select({ id: chapters.id }).from(chapters).where(and(eq(chapters.userId, userId), gte(chapters.createdAt, yearStart))).all(),
     ]);
 
     return NextResponse.json({
@@ -52,8 +60,10 @@ export async function GET() {
       totalFanfics: allFanfics.length,
       totalCollections: allCollections.length,
       currentStreak: stats?.currentStreak ?? 0,
-      monthDays,
-      yearDays,
+      monthPoems: monthPoemRows.length,
+      monthFanfics: monthFanficRows.length + monthChapterRows.length,
+      yearPoems: yearPoemRows.length,
+      yearFanfics: yearFanficRows.length + yearChapterRows.length,
       recentPoems,
       recentFanfics,
       weekActivity,
