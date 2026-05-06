@@ -24,7 +24,7 @@ export function SakuraPetals({ night }: { night: boolean }) {
     resize();
     window.addEventListener('resize', resize);
 
-    for (let i = 0; i < 45; i++) {
+    for (let i = 0; i < 22; i++) {
       petals.push({
         x: Math.random() * 1.3 - .15,
         y: Math.random(),
@@ -70,7 +70,7 @@ export function SakuraPetals({ night }: { night: boolean }) {
   return (
     <canvas
       ref={ref}
-      style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1 }}
+      style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1, willChange: 'contents' }}
     />
   );
 }

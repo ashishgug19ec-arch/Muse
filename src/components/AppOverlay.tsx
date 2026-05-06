@@ -7,33 +7,58 @@ import { PageSanctuary } from './pages/PageSanctuary';
 import { PageLibrary } from './pages/PageLibrary';
 import { PageCollections } from './pages/PageCollections';
 import { PageScraps } from './pages/PageScraps';
-// import { PageIkigai } from './pages/PageIkigai';
+import { PageIkigai } from './pages/PageIkigai';
 import { PageFanFiction } from './pages/PageFanFiction';
+import { PageExplore } from './pages/PageExplore';
 import { PageAuthorProfile } from './pages/PageAuthorProfile';
 import { PageSettings } from './pages/PageSettings';
+import { PageNotifications } from './pages/PageNotifications';
+import { PagePricing } from './pages/PagePricing';
+import { PageStoryUpload } from './pages/PageStoryUpload';
+import { PageStoryReader } from './pages/PageStoryReader';
 
 const PAGE_MAP: Record<string, React.ComponentType<{ night: boolean }>> = {
   dashboard: PageDashboard,
   write: PageBeginWriting,
   'begin writing': PageBeginWriting,
+  BeginWriting: PageBeginWriting,
   sanctuary: PageSanctuary,
+  Sanctuary: PageSanctuary,
   poems: PageLibrary,
   library: PageLibrary,
   'my library': PageLibrary,
+  Library: PageLibrary,
   collections: PageCollections,
+  Collections: PageCollections,
   scraps: PageScraps,
-  // ikigai: PageIkigai,
-  // 'ikigai journal': PageIkigai,
+  Scraps: PageScraps,
+  ikigai: PageIkigai,
+  'ikigai journal': PageIkigai,
+  Ikigai: PageIkigai,
   'fan fiction': PageFanFiction,
   'fan-fiction': PageFanFiction,
+  FanFiction: PageFanFiction,
+  explore: PageExplore,
+  Explore: PageExplore,
   profile: PageAuthorProfile,
   'author profile': PageAuthorProfile,
+  AuthorProfile: PageAuthorProfile,
   settings: PageSettings,
+  Settings: PageSettings,
+  notifications: PageNotifications,
+  Notifications: PageNotifications,
+  pricing: PagePricing,
+  Pricing: PagePricing,
+  'story upload': PageStoryUpload,
+  StoryUpload: PageStoryUpload,
+  'story reader': PageStoryReader,
+  StoryReader: PageStoryReader,
 };
 
 const NAV_LINKS = [
   { label: 'Dashboard',   page: 'dashboard' },
   { label: 'Poems',       page: 'poems' },
+  { label: 'Explore',     page: 'explore' },
   { label: 'Fan Fiction', page: 'fan fiction' },
   { label: 'Collections', page: 'collections' },
 ];

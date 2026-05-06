@@ -1,31 +1,41 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@clerk/nextjs';
 
 interface Props { night: boolean; }
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.34, 1.2, 0.64, 1] } },
+};
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
+
 export function PageSettings({ night }: Props) {
   const { user, isLoaded } = useUser();
-  const [bio, setBio] = useState('');
-  const [pronouns, setPronouns] = useState('');
-  const [location, setLocation] = useState('');
+  const [bio, setBio]               = useState('');
+  const [pronouns, setPronouns]     = useState('');
+  const [location, setLocation]     = useState('');
   const [whyYouWrite, setWhyYouWrite] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const [saving, setSaving]         = useState(false);
+  const [saved, setSaved]           = useState(false);
+  const [loaded, setLoaded]         = useState(false);
 
   const n = night;
   const ink  = n ? 'rgba(230,220,255,.9)'  : '#1e1628';
+  const ink2 = n ? 'rgba(200,180,255,.7)'  : '#4a3960';
   const ink3 = n ? 'rgba(160,140,200,.55)' : '#8a7aa0';
   const cardBd = n ? 'rgba(160,124,200,.2)'  : 'rgba(208,191,240,.52)';
   const cardBg = n ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.72)';
 
   const inputStyle: React.CSSProperties = {
-    width: '100%', padding: '11px 16px',
-    borderRadius: 12, border: `1.5px solid ${cardBd}`,
-    background: cardBg, backdropFilter: 'blur(18px)',
+    width: '100%', padding: '12px 16px', borderRadius: 14,
+    border: `1.5px solid ${cardBd}`,
+    background: n ? 'rgba(255,255,255,.06)' : 'rgba(255,255,255,.85)',
+    backdropFilter: 'blur(18px)',
     color: ink, fontSize: 13, fontFamily: "'DM Sans',sans-serif",
-    outline: 'none', boxSizing: 'border-box',
+    outline: 'none', boxSizing: 'border-box' as const,
+    transition: 'border-color .2s',
   };
 
   useEffect(() => {
@@ -57,68 +67,123 @@ export function PageSettings({ night }: Props) {
     } finally { setSaving(false); }
   }
 
-  const Section = ({ title }: { title: string }) => (
-    <div style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, marginBottom: 14, marginTop: 28 }}>{title}</div>
-  );
-
-  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div style={{ marginBottom: 16 }}>
-      <label style={{ fontSize: 10, color: ink3, display: 'block', marginBottom: 6, letterSpacing: '.06em', textTransform: 'uppercase' }}>{label}</label>
-      {children}
-    </div>
-  );
-
   const displayName = user?.firstName
     ? `${user.firstName}${user.lastName ? ' ' + user.lastName : ''}`
     : user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ?? '';
-
   const initials = user?.firstName?.[0] ?? user?.emailAddresses?.[0]?.emailAddress?.[0]?.toUpperCase() ?? '🌸';
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: 620, margin: '0 auto' }}>
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, marginBottom: 6 }}>Account</div>
-        <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 30, fontWeight: 300, color: ink }}>Settings</div>
-      </div>
+    <div style={{ padding: '36px 44px', maxWidth: 640, margin: '0 auto' }}>
 
-      <Section title="Profile" />
-      <div style={{ borderRadius: 20, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(18px)', padding: '20px 22px' }}>
-        {/* Avatar + name (read-only from Clerk) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${cardBd}` }}>
-          <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg,#c084fc,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, color: '#fff', fontWeight: 600, flexShrink: 0 }}>
-            {initials}
-          </div>
-          <div>
-            <div style={{ fontSize: 15, color: ink, fontWeight: 400 }}>{displayName}</div>
-            <div style={{ fontSize: 11, color: ink3, marginTop: 2 }}>{user?.emailAddresses?.[0]?.emailAddress}</div>
-          </div>
+      {/* Header */}
+      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ marginBottom: 36 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+          <div style={{ width: 22, height: 1, background: 'linear-gradient(90deg,#c084fc,transparent)' }} />
+          <span style={{ fontSize: 10, letterSpacing: '.14em', textTransform: 'uppercase', color: '#c084fc' }}>Account</span>
         </div>
+        <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 32, fontWeight: 300, color: ink, letterSpacing: '-.03em', lineHeight: 1.1 }}>
+          Your{' '}
+          <em style={{ fontStyle: 'italic', background: 'linear-gradient(135deg,#c084fc,#f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Profile</em>
+        </h1>
+      </motion.div>
 
-        <Field label="Bio">
-          <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="A few words about you…"
-            style={{ ...inputStyle, minHeight: 80, resize: 'none' as const, lineHeight: 1.6 }} />
-        </Field>
-        <Field label="Pronouns">
-          <input value={pronouns} onChange={e => setPronouns(e.target.value)} placeholder="she/her, they/them…" style={inputStyle} />
-        </Field>
-        <Field label="Location">
-          <input value={location} onChange={e => setLocation(e.target.value)} placeholder="City, country…" style={inputStyle} />
-        </Field>
-        <Field label="Why you write">
-          <input value={whyYouWrite} onChange={e => setWhyYouWrite(e.target.value)} placeholder="What brings you to write…" style={inputStyle} />
-        </Field>
-      </div>
+      <motion.div initial="hidden" animate="show" variants={stagger} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-      <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 14 }}>
-        {saved && <span style={{ fontSize: 12, color: '#7c3aed' }}>Saved ✓</span>}
-        <button onClick={handleSave} disabled={saving} style={{
-          padding: '11px 32px', borderRadius: 50, border: 'none',
-          background: saving ? 'rgba(124,58,237,.4)' : 'linear-gradient(135deg,#c084fc,#7c3aed)',
-          color: '#fff', fontSize: 13, cursor: saving ? 'not-allowed' : 'pointer',
-          fontFamily: "'Playfair Display',serif",
-          boxShadow: saving ? 'none' : '0 6px 20px rgba(124,58,237,.3)',
-        }}>{saving ? 'Saving…' : 'Save changes'}</button>
-      </div>
+        {/* Account identity (read-only from Clerk) */}
+        <motion.div variants={fadeUp} style={{ borderRadius: 22, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'linear-gradient(135deg,#c084fc,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: '#fff', fontWeight: 600, flexShrink: 0, boxShadow: '0 4px 16px rgba(124,58,237,.3)' }}>
+              {initials}
+            </div>
+            <div>
+              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 18, color: ink, fontWeight: 400 }}>{displayName}</div>
+              <div style={{ fontSize: 11, color: ink3, marginTop: 3 }}>{user?.emailAddresses?.[0]?.emailAddress}</div>
+            </div>
+            <div style={{ marginLeft: 'auto', fontSize: 10, padding: '3px 12px', borderRadius: 50, background: 'rgba(192,132,252,.12)', color: '#c084fc', border: '1px solid rgba(192,132,252,.3)', letterSpacing: '.06em' }}>Poet</div>
+          </div>
+        </motion.div>
+
+        {/* Bio & details */}
+        <motion.div variants={fadeUp} style={{ borderRadius: 22, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '24px', overflow: 'hidden', position: 'relative' }}>
+          <div style={{ position: 'absolute', top: -20, right: -20, width: 80, height: 80, borderRadius: '50%', background: 'radial-gradient(circle,rgba(192,132,252,.12),transparent 70%)', pointerEvents: 'none' }} />
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+            <div style={{ width: 16, height: 1, background: 'linear-gradient(90deg,#c084fc,transparent)' }} />
+            <span style={{ fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: ink3 }}>Writer Profile</span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+            <div>
+              <label style={{ fontSize: 10, letterSpacing: '.08em', textTransform: 'uppercase', color: ink3, display: 'block', marginBottom: 8 }}>Bio</label>
+              <textarea
+                value={bio}
+                onChange={e => setBio(e.target.value)}
+                placeholder="A few words about you…"
+                style={{ ...inputStyle, minHeight: 88, resize: 'none' as const, lineHeight: 1.65, fontFamily: "'Playfair Display',serif", fontSize: 14 }}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div>
+                <label style={{ fontSize: 10, letterSpacing: '.08em', textTransform: 'uppercase', color: ink3, display: 'block', marginBottom: 8 }}>Pronouns</label>
+                <input value={pronouns} onChange={e => setPronouns(e.target.value)} placeholder="she/her, they/them…" style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ fontSize: 10, letterSpacing: '.08em', textTransform: 'uppercase', color: ink3, display: 'block', marginBottom: 8 }}>Location</label>
+                <input value={location} onChange={e => setLocation(e.target.value)} placeholder="City, country…" style={inputStyle} />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ fontSize: 10, letterSpacing: '.08em', textTransform: 'uppercase', color: ink3, display: 'block', marginBottom: 8 }}>Why you write</label>
+              <input value={whyYouWrite} onChange={e => setWhyYouWrite(e.target.value)} placeholder="What brings you to write…" style={inputStyle} />
+            </div>
+
+          </div>
+        </motion.div>
+
+        {/* Writing preferences */}
+        <motion.div variants={fadeUp} style={{ borderRadius: 22, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+            <div style={{ width: 16, height: 1, background: 'linear-gradient(90deg,#f472b6,transparent)' }} />
+            <span style={{ fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: ink3 }}>Preferences</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {[
+              { label: 'Email notifications', desc: 'When someone likes your poem' },
+              { label: 'Weekly digest', desc: 'A summary of your week' },
+              { label: 'Featured in Explore', desc: 'Allow your poems to be featured' },
+              { label: 'Public profile', desc: 'Others can find your work' },
+            ].map(pref => (
+              <div key={pref.label} style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '12px 14px', borderRadius: 14, border: `1px solid ${cardBd}`, background: n ? 'rgba(255,255,255,.03)' : 'rgba(255,255,255,.5)' }}>
+                <div>
+                  <div style={{ fontSize: 12, color: ink2, fontWeight: 400, marginBottom: 2, fontFamily: "'DM Sans',sans-serif" }}>{pref.label}</div>
+                  <div style={{ fontSize: 10, color: ink3 }}>{pref.desc}</div>
+                </div>
+                <div style={{ width: 36, height: 20, borderRadius: 10, background: 'linear-gradient(135deg,#c084fc,#7c3aed)', flexShrink: 0, marginLeft: 10, marginTop: 2, cursor: 'pointer', display: 'flex', alignItems: 'center', paddingRight: 3, justifyContent: 'flex-end' }}>
+                  <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,.2)' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Save bar */}
+        <motion.div variants={fadeUp} style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 14, paddingTop: 4 }}>
+          <AnimatePresence>
+            {saved && (
+              <motion.span initial={{ opacity: 0, scale: .9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} style={{ fontSize: 12, color: '#7c3aed' }}>✓ Saved</motion.span>
+            )}
+          </AnimatePresence>
+          <motion.button
+            whileHover={{ scale: 1.03, y: -1 }} whileTap={{ scale: .98 }}
+            onClick={handleSave}
+            disabled={saving}
+            style={{ padding: '12px 34px', borderRadius: 50, border: 'none', background: saving ? 'rgba(124,58,237,.4)' : 'linear-gradient(135deg,#c084fc,#7c3aed)', color: '#fff', fontSize: 13, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: "'Playfair Display',serif", letterSpacing: '.04em', boxShadow: saving ? 'none' : '0 6px 22px rgba(124,58,237,.3)' }}
+          >{saving ? 'Saving…' : 'Save changes'}</motion.button>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
