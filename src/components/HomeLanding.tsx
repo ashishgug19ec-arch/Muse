@@ -694,26 +694,6 @@ function CinematicSection({ night }: { night: boolean }) {
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 140, background: `linear-gradient(180deg,${night ? '#0a0518' : '#f7f3ff'},transparent)`, zIndex: 2, pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 140, background: `linear-gradient(0deg,${night ? '#0a0518' : '#f7f3ff'},transparent)`, zIndex: 2, pointerEvents: 'none' }} />
 
-      {/* Star field + moon */}
-      <motion.div style={{ position: 'absolute', inset: '-10% 0', y, zIndex: 1, opacity: .5 }}>
-        <svg viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice" style={{ width: '100%', height: '100%' }}>
-          {[...Array(120)].map((_, i) => {
-            const sx = (i * 173) % 1440, sy = (i * 97) % 1000;
-            return <circle key={i} cx={sx} cy={sy} r={(i % 5) * .4 + .5} fill="#fff" opacity={.3 + (i % 5) * .15} />;
-          })}
-          <defs>
-            <radialGradient id="cm-moon" cx=".5" cy=".5" r=".5">
-              <stop offset="0" stopColor="#fff8e8" />
-              <stop offset=".4" stopColor="#e8d4b8" />
-              <stop offset=".7" stopColor="#7a5838" />
-              <stop offset="1" stopColor="#1a0a08" />
-            </radialGradient>
-          </defs>
-          <circle cx="720" cy="320" r="160" fill="rgba(255,235,200,.05)" />
-          <circle cx="720" cy="320" r="80" fill="url(#cm-moon)" />
-          <ellipse cx="748" cy="320" rx="32" ry="80" fill="rgba(8,4,15,.4)" />
-        </svg>
-      </motion.div>
 
       <div style={{ position: 'relative', zIndex: 5, maxWidth: 1280, margin: '0 auto', textAlign: 'center' }}>
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
