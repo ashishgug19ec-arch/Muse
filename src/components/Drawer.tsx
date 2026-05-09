@@ -1,198 +1,189 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@clerk/nextjs';
+import { useUser, useClerk } from '@clerk/nextjs';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MuseLogo } from './ui/MuseLogo';
 import { useMuseStore } from '@/lib/store';
 
-const PAGES = [
-  { section: 'Write', items: [
-    { icon: '✦', label: 'Begin Writing',  page: 'write',           emoji: '✍️' },
-    { icon: '✐', label: 'Sanctuary',      page: 'sanctuary',       emoji: '🌸' },
-    { icon: '⊞', label: 'Fan Fiction',    page: 'fan fiction',     emoji: '🌙' },
+const GROUPS = [
+  { h: 'WRITE', auth: true, items: [
+    { label: 'Sanctuary',       ic: '✎', page: 'sanctuary'     },
+    { label: 'New poem',        ic: '+', page: 'new poem'       },
+    { label: 'Fan fiction',     ic: '✦', page: 'fan fiction'   },
+    { label: 'Ikigai journal',  ic: '◉', page: 'ikigai'        },
   ]},
-  { section: 'My Works', items: [
-    { icon: '◈', label: 'Poems',          page: 'poems',           emoji: '📜' },
-    { icon: '◈', label: 'Collections',    page: 'collections',     emoji: '📚' },
-    { icon: '✦', label: 'Scraps',         page: 'scraps',          emoji: '🌿' },
-    { icon: '◉', label: 'Ikigai Journal', page: 'ikigai',          emoji: '🔮' },
+  { h: 'READ', auth: false, items: [
+    { label: 'Discover',        ic: '✣', page: 'explore',       auth: false },
+    { label: 'Featured poets',  ic: '★', page: 'explore',       auth: false },
+    { label: 'Trending',        ic: '↗', page: 'explore',       auth: false },
+    { label: 'Collections',     ic: '▥', page: 'collections',   auth: true  },
   ]},
-  { section: 'Discover', items: [
-    { icon: '⊞', label: 'Explore',        page: 'explore',         emoji: '✨' },
-  ]},
-  { section: 'Account', items: [
-    { icon: '◉', label: 'Profile',        page: 'profile',         emoji: '👤' },
-    { icon: '⊟', label: 'Settings',       page: 'settings',        emoji: '⚙️' },
-    { icon: '🔔', label: 'Notifications',  page: 'notifications',   emoji: '🔔' },
-    { icon: '◈', label: 'Pricing',        page: 'pricing',         emoji: '🌺' },
+  { h: 'ACCOUNT', auth: true, items: [
+    { label: 'My profile',      ic: '→', page: 'profile'        },
+    { label: 'Notifications',   ic: '◷', page: 'notifications'  },
+    { label: 'Settings',        ic: '⚙', page: 'settings'       },
   ]},
 ];
 
 export function Drawer() {
-  const { drawerOpen, night, activePage, setDrawerOpen, openPage } = useMuseStore();
+  const { drawerOpen, night, setDrawerOpen, openPage } = useMuseStore();
   const { isSignedIn, isLoaded, user } = useUser();
+  const { signOut } = useClerk();
   const router = useRouter();
   const n = night;
+
+  const ink     = n ? '#f6eafd'                    : '#0c0612';
+  const mono    = n ? '#b89ad8'                    : '#7a3a8a';
+  const bd      = n ? 'rgba(184,154,216,.18)'      : 'rgba(122,58,138,.1)';
+  const iconBg  = n ? 'rgba(184,154,216,.12)'      : 'rgba(122,58,138,.08)';
+  const hoverBg = n ? 'rgba(184,154,216,.1)'       : 'rgba(122,58,138,.06)';
+
+  const displayName = user?.firstName
+    ? `${user.firstName}${user.lastName ? ' ' + user.lastName : ''}`
+    : user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ?? 'poet';
 
   function handleNav(page: string) {
     setDrawerOpen(false);
     openPage(page);
   }
 
-  const overlayBg  = n ? 'rgba(10,4,20,.62)'       : 'rgba(60,30,80,.18)';
-  const panelBg    = n ? 'rgba(20,12,36,.97)'       : 'rgba(252,249,255,.97)';
-  const borderCol  = n ? 'rgba(160,124,200,.2)'     : 'rgba(208,191,240,.48)';
-  const nameCol    = n ? 'rgba(240,230,255,.9)'     : '#1e1628';
-  const taglineCol = n ? 'rgba(200,170,255,.5)'     : '#bbadd0';
-  const sectionCol = n ? 'rgba(160,130,200,.4)'     : '#c4b5d8';
-  const labelCol   = n ? 'rgba(230,220,255,.82)'    : '#4a3960';
-  const iconCol    = n ? 'rgba(200,160,255,.6)'     : '#a090b8';
-  const hoverBg    = n ? 'rgba(160,124,200,.12)'    : 'rgba(208,191,240,.22)';
-  const activeBg   = n ? 'rgba(192,132,252,.14)'    : 'rgba(192,132,252,.1)';
-  const activeBd   = n ? 'rgba(192,132,252,.3)'     : 'rgba(192,132,252,.35)';
-
-  const displayName = user?.firstName
-    ? `${user.firstName}${user.lastName ? ' ' + user.lastName : ''}`
-    : 'My garden';
-  const initials = user?.firstName?.[0] ?? user?.emailAddresses?.[0]?.emailAddress?.[0]?.toUpperCase() ?? '🌸';
+  const visibleGroups = isLoaded && isSignedIn ? GROUPS : [];
 
   return (
-    <>
-      {/* Overlay */}
-      <div
-        onClick={() => setDrawerOpen(false)}
-        style={{
-          position: 'fixed', inset: 0, zIndex: 199,
-          background: drawerOpen ? overlayBg : 'transparent',
-          backdropFilter: drawerOpen ? 'blur(4px)' : 'none',
-          WebkitBackdropFilter: drawerOpen ? 'blur(4px)' : 'none',
-          pointerEvents: drawerOpen ? 'all' : 'none',
-          transition: 'background .35s, backdrop-filter .35s',
-        }}
-      />
-
-      {/* Panel */}
-      <div style={{
-        position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 200,
-        width: 268,
-        background: panelBg,
-        backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)',
-        borderRight: `1px solid ${borderCol}`,
-        transform: drawerOpen ? 'translateX(0)' : 'translateX(-100%)',
-        transition: 'transform .4s cubic-bezier(.34,1.2,.64,1)',
-        display: 'flex', flexDirection: 'column', overflowY: 'auto',
-        boxShadow: drawerOpen ? '8px 0 40px rgba(124,58,237,.1)' : 'none',
-      }}>
-
-        {/* Header */}
-        <div style={{ padding: '20px 22px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${borderCol}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <MuseLogo />
-            <div>
-              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, color: nameCol, fontWeight: 400, letterSpacing: '-.01em' }}>Muse</div>
-              <div style={{ fontSize: 9, color: taglineCol, letterSpacing: '.12em', fontWeight: 300 }}>garden of poetry</div>
-            </div>
-          </div>
-          <button
+    <AnimatePresence>
+      {drawerOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setDrawerOpen(false)}
-            style={{ width: 30, height: 30, borderRadius: '50%', border: `1px solid ${borderCol}`, background: n ? 'rgba(255,255,255,.06)' : 'rgba(255,255,255,.7)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: n ? 'rgba(200,170,255,.7)' : '#8a7aa0' }}
-          >✕</button>
-        </div>
+            style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,.45)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+          />
 
-        {/* User chip */}
-        <AnimatePresence>
-          {isLoaded && isSignedIn && (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
-              style={{ margin: '12px 16px', padding: '12px 14px', borderRadius: 16, border: `1px solid ${n ? 'rgba(160,124,200,.2)' : 'rgba(208,191,240,.4)'}`, background: n ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.62)', display: 'flex', alignItems: 'center', gap: 11, cursor: 'pointer' }}
-              onClick={() => handleNav('profile')}
-            >
-              <div style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg,#c084fc,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, color: '#fff', fontWeight: 600, boxShadow: '0 2px 10px rgba(124,58,237,.3)' }}>
-                {initials}
-              </div>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: 13, color: nameCol, fontWeight: 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
-                <div style={{ fontSize: 10, color: n ? 'rgba(200,170,255,.55)' : '#8a7aa0', fontWeight: 300, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {user?.emailAddresses?.[0]?.emailAddress}
+          {/* Panel */}
+          <motion.aside
+            initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
+            transition={{ type: 'spring', damping: 28, stiffness: 240 }}
+            style={{
+              position: 'fixed', left: 0, top: 0, bottom: 0, zIndex: 201,
+              width: 'min(420px, 90vw)',
+              background: n ? 'rgba(8,4,15,.86)' : 'rgba(255,255,255,.86)',
+              backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              borderRight: `1px solid ${bd}`,
+              padding: '32px 28px',
+              display: 'flex', flexDirection: 'column', gap: 24,
+              overflowY: 'auto', color: ink,
+            }}>
+
+            {/* Header row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+                <svg width="34" height="34" viewBox="0 0 36 36" fill="none">
+                  <circle cx="18" cy="18" r="4.5" fill="#7a3a8a" />
+                  <g transform="translate(18,18)">
+                    {[0, 72, 144, 216, 288].map((a, i) => (
+                      <ellipse key={a} rx="5.5" ry="9.5"
+                        fill={i < 2 ? 'rgba(248,200,224,.95)' : 'rgba(232,212,248,.92)'}
+                        stroke="rgba(160,124,200,.55)" strokeWidth=".7"
+                        transform={`rotate(${a}) translate(0,-9)`} />
+                    ))}
+                  </g>
+                </svg>
+                <div style={{ lineHeight: 1.05 }}>
+                  <div className="serif" style={{ fontSize: 20, fontWeight: 400, letterSpacing: '-.02em', color: ink }}>Muse</div>
+                  <div className="mono" style={{ fontSize: 9, letterSpacing: '.18em', opacity: .55, marginTop: 2, textTransform: 'uppercase', color: mono }}>garden of poetry</div>
                 </div>
               </div>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={iconCol} strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Sign-in prompt */}
-        {isLoaded && !isSignedIn && (
-          <div style={{ margin: '12px 16px', padding: '14px 16px', borderRadius: 16, border: `1px solid ${n ? 'rgba(160,124,200,.2)' : 'rgba(208,191,240,.4)'}`, background: n ? 'rgba(255,255,255,.04)' : 'rgba(255,255,255,.58)' }}>
-            <div style={{ fontSize: 13, color: nameCol, fontWeight: 400, marginBottom: 4 }}>Not signed in</div>
-            <div style={{ fontSize: 11, color: taglineCol, fontWeight: 300, marginBottom: 12 }}>Sign in to access your garden</div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => { setDrawerOpen(false); router.push('/sign-in'); }} style={{ flex: 1, padding: '8px', borderRadius: 50, border: `1px solid ${borderCol}`, background: 'transparent', color: '#c084fc', fontSize: 11, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>Sign in</button>
-              <button onClick={() => { setDrawerOpen(false); router.push('/sign-up'); }} style={{ flex: 1, padding: '8px', borderRadius: 50, border: 'none', background: 'linear-gradient(135deg,#c084fc,#7c3aed)', color: '#fff', fontSize: 11, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>Join Muse</button>
+              <button onClick={() => setDrawerOpen(false)}
+                style={{ width: 36, height: 36, borderRadius: '50%', background: 'transparent', border: `1px solid ${bd}`, cursor: 'pointer', fontSize: 14, color: ink, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                ✕
+              </button>
             </div>
-          </div>
-        )}
 
-        {/* Nav */}
-        <div style={{ flex: 1, padding: '8px 10px 12px' }}>
-          {(isSignedIn ? PAGES : []).map(section => (
-            <div key={section.section} style={{ marginBottom: 18 }}>
-              <div style={{ fontSize: 9, fontWeight: 500, letterSpacing: '.12em', textTransform: 'uppercase', color: sectionCol, padding: '0 10px', marginBottom: 4 }}>
-                {section.section}
+            {/* Welcome heading */}
+            <div className="serif" style={{ fontSize: 32, fontWeight: 300, letterSpacing: '-.025em', lineHeight: 1.1, fontStyle: 'italic', color: ink }}>
+              {isLoaded && isSignedIn ? (
+                <>Welcome back,<br />
+                  <span style={{ background: 'linear-gradient(90deg,#7a3a8a 0%,#e89aae 25%,#b89ad8 50%,#e89aae 75%,#7a3a8a 100%)', backgroundSize: '200% 100%', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent', animation: 'shimmer 8s linear infinite' }}>
+                    {displayName}.
+                  </span>
+                </>
+              ) : (
+                <>Your garden<br />
+                  <span style={{ background: 'linear-gradient(90deg,#7a3a8a 0%,#e89aae 25%,#b89ad8 50%,#e89aae 75%,#7a3a8a 100%)', backgroundSize: '200% 100%', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent', animation: 'shimmer 8s linear infinite' }}>
+                    awaits.
+                  </span>
+                </>
+              )}
+            </div>
+
+            {/* Sign-in prompt for guests */}
+            {isLoaded && !isSignedIn && (
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={() => { setDrawerOpen(false); router.push('/sign-in'); }}
+                  style={{ flex: 1, padding: '11px', borderRadius: 50, border: `1px solid ${bd}`, background: 'transparent', color: ink, fontSize: 12, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>
+                  Sign in
+                </button>
+                <button onClick={() => { setDrawerOpen(false); router.push('/sign-up'); }}
+                  style={{ flex: 1, padding: '11px', borderRadius: 50, border: 'none', background: '#0c0612', color: '#f7f3ff', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>
+                  Begin writing
+                </button>
               </div>
-              {section.items.map(item => {
-                const isActive = activePage?.toLowerCase() === item.page || activePage?.toLowerCase() === item.label.toLowerCase();
-                return (
-                  <button
-                    key={item.label}
-                    onClick={() => handleNav(item.page)}
-                    style={{
-                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                      padding: '9px 12px', borderRadius: 12,
-                      border: isActive ? `1px solid ${activeBd}` : '1px solid transparent',
-                      background: isActive ? activeBg : 'transparent',
-                      cursor: 'pointer', textAlign: 'left', marginBottom: 1,
-                      transition: 'all .15s',
-                    }}
-                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = hoverBg; }}
-                    onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    <span style={{ fontSize: 14, width: 22, textAlign: 'center', flexShrink: 0, opacity: .8 }}>{item.emoji}</span>
-                    <span style={{ fontSize: 13, color: isActive ? '#c084fc' : labelCol, fontWeight: isActive ? 400 : 300, fontFamily: "'DM Sans',sans-serif" }}>{item.label}</span>
-                    {isActive && <div style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#c084fc', opacity: .7 }} />}
-                  </button>
-                );
-              })}
+            )}
+
+            {/* Nav groups — filtered by auth */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 4 }}>
+              {visibleGroups.map(grp => (
+                <div key={grp.h} style={{ marginTop: 18 }}>
+                  <div className="mono" style={{ fontSize: 10, letterSpacing: '.24em', opacity: .5, marginBottom: 8, color: mono }}>{grp.h}</div>
+                  {grp.items.map((item: any) => (
+                    <button key={item.label} onClick={() => handleNav(item.page)}
+                      style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 14px', borderRadius: 14, background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', transition: 'background .2s', color: 'inherit', fontFamily: 'inherit' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                      <span style={{ width: 30, height: 30, borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', background: iconBg, fontSize: 13, color: n ? '#e89aae' : '#7a3a8a', flexShrink: 0 }}>
+                        {item.ic}
+                      </span>
+                      <span className="serif" style={{ fontSize: 16, fontWeight: 300, color: ink }}>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* Night toggle + Footer */}
-        <div style={{ padding: '12px 16px 24px', borderTop: `1px solid ${borderCol}` }}>
-          {/* Night mode */}
-          <button
-            onClick={() => useMuseStore.getState().toggleNight()}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 10, border: 'none', background: 'transparent', cursor: 'pointer', marginBottom: 12 }}
-            onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-          >
-            <span style={{ fontSize: 15, width: 22, textAlign: 'center' }}>{n ? '☀️' : '🌙'}</span>
-            <span style={{ fontSize: 12, color: labelCol, fontWeight: 300, fontFamily: "'DM Sans',sans-serif" }}>{n ? 'Day mode' : 'Night mode'}</span>
-          </button>
+            {/* Bottom: night toggle + sign-out (auth) + CTA */}
+            <div style={{ marginTop: 'auto', paddingTop: 24, borderTop: `1px solid ${bd}`, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <button onClick={() => useMuseStore.getState().toggleNight()}
+                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 14px', borderRadius: 14, background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', transition: 'background .2s', color: 'inherit', fontFamily: 'inherit' }}
+                onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                <span style={{ width: 30, height: 30, borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', background: iconBg, fontSize: 13, color: n ? '#e89aae' : '#7a3a8a' }}>
+                  {n ? '☉' : '☾'}
+                </span>
+                <span className="serif" style={{ fontSize: 16, fontWeight: 300, color: ink }}>{n ? 'Day mode' : 'Night mode'}</span>
+              </button>
 
-          {isSignedIn ? (
-            <button
-              onClick={() => { setDrawerOpen(false); openPage('write'); }}
-              style={{ width: '100%', padding: '12px', borderRadius: 50, border: 'none', background: 'linear-gradient(135deg,#c084fc,#9b72cf,#7c3aed)', color: '#fff', fontSize: 13, cursor: 'pointer', fontFamily: "'Playfair Display',serif", letterSpacing: '.05em', boxShadow: '0 6px 24px rgba(124,58,237,.32)' }}
-            >Begin writing</button>
-          ) : (
-            <button
-              onClick={() => { setDrawerOpen(false); router.push('/sign-up'); }}
-              style={{ width: '100%', padding: '12px', borderRadius: 50, border: 'none', background: 'linear-gradient(135deg,#c084fc,#9b72cf,#7c3aed)', color: '#fff', fontSize: 13, cursor: 'pointer', fontFamily: "'Playfair Display',serif", letterSpacing: '.05em', boxShadow: '0 6px 24px rgba(124,58,237,.32)' }}
-            >Join Muse — it&apos;s free</button>
-          )}
-        </div>
-      </div>
-    </>
+              {isLoaded && isSignedIn && (
+                <button
+                  onClick={() => { setDrawerOpen(false); signOut(); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 14px', borderRadius: 14, background: 'transparent', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', transition: 'background .2s', color: 'inherit', fontFamily: 'inherit' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                  <span style={{ width: 30, height: 30, borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', background: iconBg, fontSize: 13, color: n ? '#e89aae' : '#7a3a8a' }}>
+                    ⎋
+                  </span>
+                  <span className="serif" style={{ fontSize: 16, fontWeight: 300, color: ink }}>Sign out</span>
+                </button>
+              )}
+
+              <button onClick={() => { setDrawerOpen(false); isSignedIn ? openPage('write') : router.push('/sign-up'); }}
+                style={{ padding: '14px 24px', borderRadius: 50, border: 'none', background: n ? '#f6eafd' : '#0c0612', color: n ? '#0c0612' : '#f7f3ff', fontSize: 13, fontWeight: 500, cursor: 'pointer', letterSpacing: '.04em', fontFamily: "'DM Sans',sans-serif", boxShadow: '0 8px 28px rgba(12,6,18,.2)' }}>
+                {isSignedIn ? 'Begin writing →' : 'Plant your first poem →'}
+              </button>
+            </div>
+
+          </motion.aside>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

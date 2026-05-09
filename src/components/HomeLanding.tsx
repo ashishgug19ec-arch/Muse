@@ -153,8 +153,8 @@ function GlassNav({ scrolled }: { scrolled: boolean }) {
 
       {/* Center: links */}
       <div style={{ display: 'flex', gap: 24, flex: 1, justifyContent: 'center' }}>
-        {['Discover', 'Sanctuary', 'Fan Fiction', 'Pricing'].map(l => (
-          <button key={l} onClick={() => openPage(l.toLowerCase())}
+        {['Discover', 'Sanctuary', 'Fan Fiction'].map(l => (
+          <button key={l} onClick={() => isSignedIn ? openPage(l.toLowerCase()) : router.push('/sign-in')}
             style={{ fontSize: 12.5, fontWeight: 400, letterSpacing: '.01em', opacity: .82, background: 'none', border: 'none', cursor: 'pointer', color: txt, whiteSpace: 'nowrap', fontFamily: "'DM Sans', sans-serif", transition: 'opacity .25s,color .25s' }}
             onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = night ? '#e89aae' : '#7a3a8a'; }}
             onMouseLeave={e => { e.currentTarget.style.opacity = '.82'; e.currentTarget.style.color = 'inherit'; }}
@@ -828,15 +828,17 @@ function CTA({ night, onBeginWriting }: { night: boolean; onBeginWriting: () => 
 ══════════════════════════════════════════════════ */
 function LandingFooter({ night }: { night: boolean }) {
   const { openPage } = useMuseStore();
+  const { isSignedIn } = useUser();
   const router = useRouter();
+  const go = (action: () => void) => isSignedIn ? action() : router.push('/sign-in');
   const ink = night ? '#f6eafd' : '#0c0612';
   const muted = night ? 'rgba(184,154,216,.55)' : 'rgba(122,58,138,.55)';
   const bd = night ? 'rgba(184,154,216,.12)' : 'rgba(122,58,138,.08)';
   const lnk = night ? 'rgba(200,180,220,.78)' : 'rgba(58,42,74,.78)';
   const cols = [
-    { h: 'Write',   l: [{ label: 'Sanctuary',     action: () => openPage('sanctuary')      }, { label: 'New poem',    action: () => openPage('new poem')     }, { label: 'Fan fiction',    action: () => openPage('fan fiction') }, { label: 'Ikigai journal', action: () => openPage('ikigai journal') }] },
-    { h: 'Read',    l: [{ label: 'Discover',       action: () => openPage('explore')        }, { label: 'Featured poets', action: () => openPage('explore')  }, { label: 'Trending',       action: () => openPage('explore')     }, { label: 'Collections',    action: () => openPage('collections')   }] },
-    { h: 'Account', l: [{ label: 'Sign in',        action: () => router.push('/sign-in')    }, { label: 'Pricing',     action: () => openPage('pricing')      }, { label: 'Settings',       action: () => openPage('settings')    }, { label: 'Help',           action: () => {}                         }] },
+    { h: 'Write',   l: [{ label: 'Sanctuary',     action: () => go(() => openPage('sanctuary'))      }, { label: 'New poem',    action: () => go(() => openPage('new poem'))     }, { label: 'Fan fiction',    action: () => go(() => openPage('fan fiction')) }, { label: 'Ikigai journal', action: () => go(() => openPage('ikigai journal')) }] },
+    { h: 'Read',    l: [{ label: 'Discover',       action: () => go(() => openPage('explore'))        }, { label: 'Featured poets', action: () => go(() => openPage('explore'))  }, { label: 'Trending',       action: () => go(() => openPage('explore'))     }, { label: 'Collections',    action: () => go(() => openPage('collections'))   }] },
+    { h: 'Account', l: [{ label: 'Sign in',        action: () => router.push('/sign-in')    }, { label: 'Settings',       action: () => go(() => openPage('settings'))    }, { label: 'Help',           action: () => {}                         }] },
     { h: 'Muse',    l: [{ label: 'About',          action: () => {}                         }, { label: 'Manifesto',   action: () => {}                       }, { label: 'Careers',        action: () => {}                      }, { label: 'Press',          action: () => {}                         }] },
   ];
 

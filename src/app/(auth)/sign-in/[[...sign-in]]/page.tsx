@@ -3,8 +3,18 @@ import { useState } from 'react';
 import { useSignIn } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type Step = 'email' | 'otp' | 'password';
+
+const PETALS = Array.from({ length: 14 }, (_, i) => ({
+  id: i,
+  left: `${4 + (i * 6.8) % 88}%`,
+  delay: `${(i * 0.9) % 9}s`,
+  dur: `${8 + (i * 1.2) % 6}s`,
+  size: 6 + (i * 1.8) % 7,
+  pink: i % 2 === 0,
+}));
 
 export default function SignInPage() {
   const { isLoaded, signIn, setActive } = useSignIn();
@@ -44,10 +54,7 @@ export default function SignInPage() {
     setLoading(true); setError('');
     try {
       const result = await signIn.attemptFirstFactor({ strategy: 'email_code', code });
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId });
-        router.push('/');
-      }
+      if (result.status === 'complete') { await setActive({ session: result.createdSessionId }); router.push('/'); }
     } catch (err: any) {
       setError(err.errors?.[0]?.longMessage ?? err.errors?.[0]?.message ?? 'Invalid code');
     } finally { setLoading(false); }
@@ -59,10 +66,7 @@ export default function SignInPage() {
     setLoading(true); setError('');
     try {
       const result = await signIn.attemptFirstFactor({ strategy: 'password', password });
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId });
-        router.push('/');
-      }
+      if (result.status === 'complete') { await setActive({ session: result.createdSessionId }); router.push('/'); }
     } catch (err: any) {
       setError(err.errors?.[0]?.longMessage ?? err.errors?.[0]?.message ?? 'Incorrect password');
     } finally { setLoading(false); }
@@ -75,166 +79,261 @@ export default function SignInPage() {
 
   return (
     <>
-      <style>{`::placeholder { color: rgba(140,100,180,.45) !important; }`}</style>
+      <style>{`
+        @keyframes petalFall {
+          0%   { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 0; }
+          8%   { opacity: 1; }
+          90%  { opacity: .5; }
+          100% { transform: translateY(105vh) rotate(380deg) scale(.85); opacity: 0; }
+        }
+        @keyframes petalSway {
+          0%,100% { margin-left: 0px; }
+          33%     { margin-left: 22px; }
+          66%     { margin-left: -12px; }
+        }
+        .f-input { transition: border-color .18s, box-shadow .18s; outline: none; }
+        .f-input:focus { border-color: #a855f7 !important; box-shadow: 0 0 0 3px rgba(168,85,247,.1) !important; }
+        .f-input::placeholder { color: #c8b8d8; }
+        .f-social:hover { border-color: rgba(168,85,247,.5) !important; background: rgba(168,85,247,.04) !important; }
+        .f-ghost:hover { color: #a855f7 !important; }
+      `}</style>
+
       <div style={{
-        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: "'DM Sans', sans-serif", padding: '24px', position: 'relative', overflow: 'hidden',
-        background: 'linear-gradient(160deg, #f5eeff 0%, #ede0ff 30%, #e8d5f5 55%, #f0e8ff 80%, #fdf5ff 100%)',
+        minHeight: '100vh',
+        background: '#f7f3ff',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '28px 20px',
+        fontFamily: "'DM Sans', sans-serif",
+        position: 'relative', overflow: 'hidden',
       }}>
-
-        {/* Background */}
-        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none' }}>
-          {/* Sun */}
-          <div style={{ position: 'absolute', top: '-8%', right: '8%', width: 320, height: 320, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,235,180,.7) 0%, rgba(255,200,150,.2) 45%, transparent 70%)' }} />
-          {/* Sky blush */}
-          <div style={{ position: 'absolute', top: '5%', left: '-5%', width: 500, height: 350, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(220,180,255,.35) 0%, transparent 70%)' }} />
-          {/* Lavender field clusters */}
-          {[
-            { l:'0%',   w:200, h:260, c:'rgba(155,90,215,.38)'  },
-            { l:'9%',   w:150, h:210, c:'rgba(175,115,230,.32)' },
-            { l:'19%',  w:220, h:290, c:'rgba(140,75,205,.42)'  },
-            { l:'30%',  w:130, h:220, c:'rgba(185,125,240,.3)'  },
-            { l:'40%',  w:170, h:270, c:'rgba(150,85,218,.38)'  },
-            { l:'51%',  w:145, h:225, c:'rgba(170,110,232,.33)' },
-            { l:'61%',  w:195, h:280, c:'rgba(142,78,208,.4)'   },
-            { l:'72%',  w:155, h:235, c:'rgba(162,100,222,.35)' },
-            { l:'82%',  w:175, h:255, c:'rgba(152,88,214,.38)'  },
-            { l:'91%',  w:145, h:210, c:'rgba(175,115,228,.32)' },
-          ].map((b, i) => (
-            <div key={i} style={{
-              position: 'absolute', bottom: '-5%', left: b.l,
-              width: b.w, height: b.h,
-              background: `radial-gradient(ellipse at 50% 88%, ${b.c} 0%, transparent 70%)`,
-              filter: 'blur(4px)',
-            }} />
-          ))}
-          {/* Ground haze */}
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '28%', background: 'linear-gradient(0deg, rgba(180,140,240,.18) 0%, transparent 100%)' }} />
-        </div>
-
-        {/* Card */}
-        <div style={{
-          width: '100%', maxWidth: 420, position: 'relative', zIndex: 10,
-          background: 'rgba(255,252,255,.62)',
-          backdropFilter: 'blur(36px)', WebkitBackdropFilter: 'blur(36px)',
-          borderRadius: 28,
-          border: '1px solid rgba(220,190,255,.55)',
-          boxShadow: '0 8px 40px rgba(140,80,220,.12), 0 1px 0 rgba(255,255,255,.9) inset',
-          padding: '44px 40px 36px',
-        }}>
-
-          {/* Logo */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 32 }}>
-            <svg width="48" height="48" viewBox="0 0 36 36" fill="none">
-              <circle cx="18" cy="18" r="17" stroke="rgba(160,100,200,.4)" strokeWidth="1"/>
-              <circle cx="18" cy="18" r="4" fill="rgba(210,100,140,.85)"/>
-              <g transform="translate(18,18)">
-                <ellipse rx="5.5" ry="9" fill="rgba(220,170,255,.95)" stroke="rgba(180,120,230,.5)" strokeWidth=".7" transform="rotate(0) translate(0,-8)"/>
-                <ellipse rx="5.5" ry="9" fill="rgba(235,190,255,.9)"  stroke="rgba(195,140,240,.5)" strokeWidth=".7" transform="rotate(72) translate(0,-8)"/>
-                <ellipse rx="5.5" ry="9" fill="rgba(215,165,250,.95)" stroke="rgba(175,115,225,.5)" strokeWidth=".7" transform="rotate(144) translate(0,-8)"/>
-                <ellipse rx="5.5" ry="9" fill="rgba(235,190,255,.9)"  stroke="rgba(195,140,240,.5)" strokeWidth=".7" transform="rotate(216) translate(0,-8)"/>
-                <ellipse rx="5.5" ry="9" fill="rgba(220,170,255,.95)" stroke="rgba(180,120,230,.5)" strokeWidth=".7" transform="rotate(288) translate(0,-8)"/>
-              </g>
-            </svg>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: '#2d1a4a', fontWeight: 400, marginTop: 12, letterSpacing: '-.02em' }}>Welcome back</div>
-            <div style={{ fontSize: 13, color: '#9070b0', marginTop: 4, fontWeight: 300 }}>Sign in to your garden</div>
-          </div>
-
-          {/* Google */}
-          <button onClick={handleGoogle} style={{
-            width: '100%', padding: '11px 16px', borderRadius: 12,
-            border: '1px solid rgba(200,170,240,.5)', background: 'rgba(255,255,255,.7)',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-            fontSize: 14, color: '#3c2a5a', fontFamily: "'DM Sans', sans-serif", fontWeight: 400,
-            marginBottom: 20, transition: 'all .2s',
+        {/* Falling petals — outer background, behind card */}
+        {PETALS.map(p => (
+          <div key={p.id} style={{
+            position: 'absolute', left: p.left, top: '-20px', zIndex: 0,
+            width: p.size, height: p.size * 1.5,
+            background: p.pink
+              ? 'radial-gradient(ellipse, rgba(220,130,190,.5) 30%, rgba(255,190,220,.28) 100%)'
+              : 'radial-gradient(ellipse, rgba(170,110,240,.4) 30%, rgba(210,170,255,.22) 100%)',
+            borderRadius: '50% 50% 50% 50% / 62% 62% 38% 38%',
+            animation: `petalFall ${p.dur} ease-in infinite, petalSway ${2.8 + p.id * 0.25}s ease-in-out infinite`,
+            animationDelay: p.delay,
+            pointerEvents: 'none',
+          }} />
+        ))}
+        <motion.div
+          initial={{ opacity: 0, y: 22 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: .55, ease: [.25, .9, .4, 1] }}
+          style={{
+            width: '100%', maxWidth: 1240, minHeight: 640,
+            borderRadius: 0, overflow: 'hidden', display: 'flex',
+            boxShadow: '0 24px 64px rgba(80,20,140,.13), 0 4px 16px rgba(80,20,140,.07)',
+            position: 'relative', zIndex: 1,
           }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,.9)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,.7)'; }}
-          >
-            <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
-            Continue with Google
-          </button>
+        >
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-            <div style={{ flex: 1, height: 1, background: 'rgba(190,160,230,.3)' }} />
-            <span style={{ fontSize: 12, color: '#b090c8', fontWeight: 300 }}>or</span>
-            <div style={{ flex: 1, height: 1, background: 'rgba(190,160,230,.3)' }} />
+          {/* ── LEFT: Form ─────────────────────────────────── */}
+          <div style={{
+            width: 400, flexShrink: 0, background: '#fff',
+            padding: '60px 52px 52px',
+            display: 'flex', flexDirection: 'column',
+            boxShadow: '4px 0 20px rgba(0,0,0,.06)', zIndex: 1,
+          }}>
+
+
+              {/* Muse logo — centered, large */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 40 }}>
+                <svg width="62" height="62" viewBox="0 0 36 36" fill="none">
+                  <circle cx="18" cy="18" r="4.5" fill="rgba(232,110,160,.92)"/>
+                  <g transform="translate(18,18)">
+                    {[0,72,144,216,288].map((a,i) => (
+                      <ellipse key={i} rx="5" ry="8.5"
+                        fill={i%2===0?'rgba(192,100,252,.88)':'rgba(216,150,255,.84)'}
+                        stroke="rgba(180,100,230,.3)" strokeWidth=".5"
+                        transform={`rotate(${a}) translate(0,-7.5)`}/>
+                    ))}
+                  </g>
+                </svg>
+                <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize: 20, color: '#1a0a2e', fontWeight: 700, letterSpacing: '.04em', marginTop: 10 }}>Muse</div>
+                <div style={{ fontSize: 9, color: '#c4aedd', letterSpacing: '.18em', textTransform: 'uppercase', marginTop: 3 }}>garden of poetry</div>
+              </div>
+
+              {/* Heading — single line */}
+              <h1 style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 26, fontWeight: 800,
+                color: '#0e0616', lineHeight: 1.1,
+                letterSpacing: '-.02em', margin: '0 0 32px',
+                whiteSpace: 'nowrap',
+              }}>
+                Your words wait for you.
+              </h1>
+
+              {/* Steps */}
+              <AnimatePresence mode="wait">
+
+                {step === 'email' && (
+                  <motion.form key="email" onSubmit={handleEmail}
+                    initial={{ opacity:0, x:10 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-10 }}
+                    transition={{ duration:.2 }}
+                    style={{ display:'flex', flexDirection:'column', flex:1 }}>
+
+                    <label style={lbl}>Email</label>
+                    <input type="email" value={email} onChange={e=>setEmail(e.target.value)}
+                      placeholder="Enter your email address" required autoFocus
+                      className="f-input" style={inp}/>
+
+                    {error && <p style={errSt}>{error}</p>}
+
+                    <button type="submit" disabled={loading} style={primaryBtn(loading)}>
+                      {loading ? 'Checking…' : 'Continue'}
+                    </button>
+
+                    <div style={{ display:'flex', alignItems:'center', gap:12, margin:'20px 0 18px' }}>
+                      <div style={{ flex:1, height:1, background:'#ede8f5' }}/>
+                      <span style={{ fontSize:12, color:'#b8a8cc', letterSpacing:'.03em' }}>or</span>
+                      <div style={{ flex:1, height:1, background:'#ede8f5' }}/>
+                    </div>
+
+                    <button type="button" onClick={handleGoogle} className="f-social" style={socialBtn}>
+                      <GoogleIcon /> Continue with Google
+                    </button>
+
+                    <div style={{ marginTop:'auto', paddingTop:32 }}>
+                      <p style={{ textAlign:'center', fontSize:12.5, color:'#a898bc', margin:'0 0 10px' }}>
+                        Don't have an account?
+                      </p>
+                      <Link href="/sign-up" style={{ textDecoration:'none' }}>
+                        <button type="button" style={outlineBtn}>Create account</button>
+                      </Link>
+                    </div>
+                  </motion.form>
+                )}
+
+                {step === 'otp' && (
+                  <motion.form key="otp" onSubmit={handleOtp}
+                    initial={{ opacity:0, x:10 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-10 }}
+                    transition={{ duration:.2 }}
+                    style={{ display:'flex', flexDirection:'column', flex:1 }}>
+
+                    <div style={{ padding:'12px 14px', background:'rgba(168,85,247,.06)', border:'1px solid rgba(168,85,247,.15)', borderRadius:10, marginBottom:22 }}>
+                      <p style={{ fontSize:13, color:'#7a5490', margin:0, fontWeight:300, lineHeight:1.6 }}>
+                        Code sent to <strong style={{ fontWeight:500, color:'#4a1a7a' }}>{email}</strong>
+                      </p>
+                    </div>
+
+                    <label style={lbl}>6-digit code</label>
+                    <input type="text" value={code} onChange={e=>setCode(e.target.value)}
+                      placeholder="• • • • • •" maxLength={6} required autoFocus
+                      className="f-input"
+                      style={{ ...inp, letterSpacing:'0.4em', textAlign:'center', fontSize:22 }}/>
+
+                    {error && <p style={errSt}>{error}</p>}
+
+                    <button type="submit" disabled={loading} style={primaryBtn(loading)}>
+                      {loading ? 'Verifying…' : 'Sign in'}
+                    </button>
+                    <button type="button" className="f-ghost"
+                      onClick={()=>{setStep('email');setError('');setCode('');}} style={ghostBtn}>
+                      ← Different email
+                    </button>
+                  </motion.form>
+                )}
+
+                {step === 'password' && (
+                  <motion.form key="password" onSubmit={handlePassword}
+                    initial={{ opacity:0, x:10 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-10 }}
+                    transition={{ duration:.2 }}
+                    style={{ display:'flex', flexDirection:'column', flex:1 }}>
+
+                    <div style={{ fontSize:12.5, color:'#a898bc', marginBottom:18, padding:'8px 12px', background:'#faf8ff', borderRadius:8, border:'1px solid #ede8f5' }}>
+                      {email}
+                    </div>
+
+                    <label style={lbl}>Password</label>
+                    <input type="password" value={password} onChange={e=>setPassword(e.target.value)}
+                      placeholder="Enter your password" required autoFocus
+                      className="f-input" style={{ ...inp, marginBottom:8 }}/>
+
+                    <div style={{ textAlign:'right', marginBottom:20 }}>
+                      <span style={{ fontSize:12.5, color:'#a855f7', cursor:'pointer', textDecoration:'underline', textUnderlineOffset:2 }}>
+                        Forgot your password?
+                      </span>
+                    </div>
+
+                    {error && <p style={errSt}>{error}</p>}
+
+                    <button type="submit" disabled={loading} style={primaryBtn(loading)}>
+                      {loading ? 'Signing in…' : 'Login'}
+                    </button>
+                    <button type="button" className="f-ghost"
+                      onClick={()=>{setStep('email');setError('');setPassword('');}} style={ghostBtn}>
+                      ← Back
+                    </button>
+                  </motion.form>
+                )}
+
+              </AnimatePresence>
           </div>
 
-          {step === 'email' && (
-            <form onSubmit={handleEmail}>
-              <label style={label}>Email address</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="you@example.com" required autoFocus style={input}
-                onFocus={e => e.currentTarget.style.borderColor = 'rgba(160,100,220,.7)'}
-                onBlur={e => e.currentTarget.style.borderColor = 'rgba(200,170,240,.5)'}
-              />
-              {error && <p style={err}>{error}</p>}
-              <button type="submit" disabled={loading} style={btn(loading)}>{loading ? 'Checking…' : 'Continue →'}</button>
-            </form>
-          )}
+          {/* ── RIGHT: Rose photo ──────────────────────────── */}
+          <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
 
-          {step === 'otp' && (
-            <form onSubmit={handleOtp}>
-              <p style={{ fontSize: 13, color: '#7a5a9a', marginBottom: 16, fontWeight: 300, lineHeight: 1.6 }}>
-                Code sent to <strong style={{ color: '#3d1f6a' }}>{email}</strong>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/roses.jpg" alt="Garden of roses" style={{
+              position:'absolute', inset:0,
+              width:'100%', height:'100%',
+              objectFit:'cover', objectPosition:'center',
+              filter: 'brightness(0.78)',
+            }}/>
+
+            {/* Uniform white tint */}
+            <div style={{ position:'absolute', inset:0, background:'rgba(255,255,255,.18)', pointerEvents:'none', zIndex:1 }}/>
+
+            {/* Bottom dark overlay */}
+            <div style={{ position:'absolute', bottom:0, left:0, right:0, height:260, background:'linear-gradient(to top, rgba(10,4,24,.75) 0%, rgba(10,4,24,.35) 55%, transparent 100%)', zIndex:2 }}/>
+
+            {/* Text overlay */}
+            <div style={{ position:'absolute', bottom:44, left:42, zIndex:3 }}>
+              <p style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 38, fontWeight: 700, fontStyle: 'normal',
+                color: '#fff', lineHeight: 1.25, margin: 0,
+                textShadow: '0 3px 18px rgba(0,0,0,.4)',
+                letterSpacing: '-.01em',
+              }}>
+                Where every word<br />finds its bloom.
               </p>
-              <label style={label}>6-digit code</label>
-              <input type="text" value={code} onChange={e => setCode(e.target.value)}
-                placeholder="000000" maxLength={6} required autoFocus
-                style={{ ...input, letterSpacing: '0.4em', textAlign: 'center', fontSize: 22 }}
-                onFocus={e => e.currentTarget.style.borderColor = 'rgba(160,100,220,.7)'}
-                onBlur={e => e.currentTarget.style.borderColor = 'rgba(200,170,240,.5)'}
-              />
-              {error && <p style={err}>{error}</p>}
-              <button type="submit" disabled={loading} style={btn(loading)}>{loading ? 'Verifying…' : 'Sign in →'}</button>
-              <button type="button" onClick={() => { setStep('email'); setError(''); setCode(''); }} style={ghost}>← Different email</button>
-            </form>
-          )}
+              <p style={{ fontSize:11.5, color:'rgba(255,235,255,.58)', marginTop:12, letterSpacing:'.14em', textTransform:'uppercase' }}>
+                Muse · Garden of Poetry
+              </p>
+            </div>
 
-          {step === 'password' && (
-            <form onSubmit={handlePassword}>
-              <label style={label}>Password</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••" required autoFocus style={input}
-                onFocus={e => e.currentTarget.style.borderColor = 'rgba(160,100,220,.7)'}
-                onBlur={e => e.currentTarget.style.borderColor = 'rgba(200,170,240,.5)'}
-              />
-              {error && <p style={err}>{error}</p>}
-              <button type="submit" disabled={loading} style={btn(loading)}>{loading ? 'Signing in…' : 'Sign in →'}</button>
-              <button type="button" onClick={() => { setStep('email'); setError(''); setPassword(''); }} style={ghost}>← Back</button>
-            </form>
-          )}
+          </div>
 
-          <p style={{ textAlign: 'center', fontSize: 13, color: '#a080c0', marginTop: 24, fontWeight: 300 }}>
-            New to Muse?{' '}
-            <Link href="/sign-up" style={{ color: '#7c3aed', fontWeight: 500, textDecoration: 'none' }}>Join free</Link>
-          </p>
-        </div>
+        </motion.div>
       </div>
     </>
   );
 }
 
-const label: React.CSSProperties = { fontSize: 12, color: '#6a4a8a', fontWeight: 400, display: 'block', marginBottom: 6 };
-const input: React.CSSProperties = {
-  width: '100%', padding: '11px 14px', borderRadius: 12,
-  border: '1px solid rgba(200,170,240,.5)', background: 'rgba(255,255,255,.65)',
-  fontSize: 14, color: '#2d1a4a', fontFamily: "'DM Sans', sans-serif",
-  outline: 'none', boxSizing: 'border-box', marginBottom: 16, transition: 'border-color .2s',
-};
-const err: React.CSSProperties = { fontSize: 12, color: '#c0406a', marginBottom: 12, marginTop: -8 };
-const ghost: React.CSSProperties = {
-  width: '100%', marginTop: 8, padding: '10px', background: 'none', border: 'none',
-  color: '#a080c0', fontSize: 13, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
-};
-function btn(loading: boolean): React.CSSProperties {
-  return {
-    width: '100%', padding: '12px', borderRadius: 12, border: 'none',
-    background: loading ? 'rgba(124,58,237,.4)' : 'linear-gradient(135deg, #a855f7, #7c3aed)',
-    color: '#fff', fontSize: 14, fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer',
-    fontFamily: "'DM Sans', sans-serif", letterSpacing: '.02em',
-    boxShadow: loading ? 'none' : '0 4px 20px rgba(124,58,237,.3)',
-    transition: 'all .2s',
-  };
+function GoogleIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 18 18" style={{ flexShrink:0 }}>
+      <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/>
+      <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/>
+      <path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/>
+      <path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/>
+    </svg>
+  );
+}
+
+const lbl: React.CSSProperties = { fontSize:12.5, color:'#7a6890', fontWeight:400, display:'block', marginBottom:8, letterSpacing:'.01em' };
+const inp: React.CSSProperties = { width:'100%', padding:'12px 14px', borderRadius:9, border:'1.5px solid #e8e0f0', background:'#fdfbff', fontSize:14, color:'#1a0a2e', fontFamily:"'DM Sans',sans-serif", boxSizing:'border-box', marginBottom:18 };
+const errSt: React.CSSProperties = { fontSize:12, color:'#c0406a', margin:'-10px 0 12px', lineHeight:1.5 };
+const socialBtn: React.CSSProperties = { width:'100%', padding:'12px 16px', borderRadius:9, border:'1.5px solid #e8e0f0', background:'#fff', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:9, fontSize:14, color:'#2d1a4a', fontFamily:"'DM Sans',sans-serif", transition:'all .18s', marginBottom:0 };
+const outlineBtn: React.CSSProperties = { width:'100%', padding:'12px', borderRadius:9, border:'1.5px solid #e8e0f0', background:'#fff', fontSize:14, color:'#4a3060', cursor:'pointer', fontFamily:"'DM Sans',sans-serif", transition:'all .18s' };
+const ghostBtn: React.CSSProperties = { marginTop:10, padding:'10px', background:'none', border:'none', color:'#b0a0c4', fontSize:13, cursor:'pointer', fontFamily:"'DM Sans',sans-serif", transition:'color .18s', width:'100%' };
+function primaryBtn(loading: boolean): React.CSSProperties {
+  return { width:'100%', padding:'13px', borderRadius:9, border:'none', background: loading ? 'rgba(168,85,247,.4)' : 'linear-gradient(135deg,#c084fc 0%,#a855f7 50%,#9333ea 100%)', color:'#fff', fontSize:14, fontWeight:500, cursor: loading ? 'not-allowed' : 'pointer', fontFamily:"'DM Sans',sans-serif", boxShadow: loading ? 'none' : '0 6px 20px rgba(168,85,247,.3)', transition:'all .2s' };
 }

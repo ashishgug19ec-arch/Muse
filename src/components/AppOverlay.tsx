@@ -1,4 +1,7 @@
 'use client';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 import { useMuseStore } from '@/lib/store';
 import { MuseLogo } from './ui/MuseLogo';
 import { PageDashboard } from './pages/PageDashboard';
@@ -13,9 +16,9 @@ import { PageExplore } from './pages/PageExplore';
 import { PageAuthorProfile } from './pages/PageAuthorProfile';
 import { PageSettings } from './pages/PageSettings';
 import { PageNotifications } from './pages/PageNotifications';
-import { PagePricing } from './pages/PagePricing';
 import { PageStoryUpload } from './pages/PageStoryUpload';
 import { PageStoryReader } from './pages/PageStoryReader';
+import { PageNewPoem } from './pages/PageNewPoem';
 
 const PAGE_MAP: Record<string, React.ComponentType<{ night: boolean }>> = {
   dashboard: PageDashboard,
@@ -47,12 +50,12 @@ const PAGE_MAP: Record<string, React.ComponentType<{ night: boolean }>> = {
   Settings: PageSettings,
   notifications: PageNotifications,
   Notifications: PageNotifications,
-  pricing: PagePricing,
-  Pricing: PagePricing,
   'story upload': PageStoryUpload,
   StoryUpload: PageStoryUpload,
   'story reader': PageStoryReader,
   StoryReader: PageStoryReader,
+  'new poem': PageNewPoem,
+  NewPoem: PageNewPoem,
 };
 
 const NAV_LINKS = [
@@ -65,10 +68,20 @@ const NAV_LINKS = [
 
 export function AppOverlay() {
   const { activePage, closePage, night, toggleNight, openPage } = useMuseStore();
+  const { isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
   const pageKey = activePage?.toLowerCase() ?? '';
   const Page = pageKey ? PAGE_MAP[pageKey] : null;
 
+  useEffect(() => {
+    if (isLoaded && !isSignedIn && activePage) {
+      closePage();
+      router.push('/sign-in');
+    }
+  }, [isLoaded, isSignedIn, activePage, closePage, router]);
+
   if (!activePage) return null;
+  if (isLoaded && !isSignedIn) return null;
 
   const bg = night
     ? 'linear-gradient(160deg,#1a0c2e 0%,#0f0620 100%)'
