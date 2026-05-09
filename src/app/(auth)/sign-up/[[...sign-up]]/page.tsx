@@ -89,7 +89,15 @@ export default function SignUpPage() {
       {/* Page */}
       <div style={{
         minHeight: '100vh',
-        background: '#f7f3ff',
+        background: [
+          'radial-gradient(ellipse at 15% 8%, rgba(232,154,184,.45) 0%, transparent 55%)',
+          'radial-gradient(ellipse at 82% 16%, rgba(232,210,244,.5) 0%, transparent 48%)',
+          'radial-gradient(ellipse at 50% 40%, rgba(212,184,232,.4) 0%, transparent 65%)',
+          'radial-gradient(ellipse at 8% 65%, rgba(200,232,210,.38) 0%, transparent 42%)',
+          'radial-gradient(ellipse at 90% 70%, rgba(248,224,200,.36) 0%, transparent 46%)',
+          'radial-gradient(ellipse at 42% 92%, rgba(232,200,224,.42) 0%, transparent 50%)',
+          '#f7f3ff',
+        ].join(','),
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '28px 20px',
         fontFamily: "'DM Sans', sans-serif",
@@ -157,12 +165,12 @@ export default function SignUpPage() {
                   style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
 
                   <h1 style={{
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: 26, fontWeight: 800,
-                    color: '#0e0616', lineHeight: 1.1,
-                    letterSpacing: '-.02em',
+                    fontFamily: "'Fraunces','Cormorant Garamond',Georgia,serif",
+                    fontOpticalSizing: 'auto',
+                    fontSize: 28, fontWeight: 400, fontStyle: 'italic',
+                    color: '#0e0616', lineHeight: 1.15,
+                    letterSpacing: '-.01em',
                     margin: '0 0 32px',
-                    whiteSpace: 'nowrap',
                   }}>
                     Let your words bloom.
                   </h1>
@@ -230,10 +238,11 @@ export default function SignUpPage() {
                   style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
 
                   <h1 style={{
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: 38, fontWeight: 900,
-                    color: '#0e0616', lineHeight: 1.05,
-                    letterSpacing: '-.02em',
+                    fontFamily: "'Fraunces','Cormorant Garamond',Georgia,serif",
+                    fontOpticalSizing: 'auto',
+                    fontSize: 38, fontWeight: 400, fontStyle: 'italic',
+                    color: '#0e0616', lineHeight: 1.1,
+                    letterSpacing: '-.01em',
                     margin: '0 0 8px',
                   }}>
                     Check your<br />inbox. 🌸
@@ -266,26 +275,28 @@ export default function SignUpPage() {
             </AnimatePresence>
           </div>
 
-          {/* ── RIGHT: Gradient background ──────────────────── */}
-          <div style={{
-            flex: 1, position: 'relative', overflow: 'hidden',
-            background: [
-              'radial-gradient(ellipse at 18% 12%, rgba(120,80,200,.42) 0%, transparent 60%)',
-              'radial-gradient(ellipse at 80% 20%, rgba(90,40,150,.48) 0%, transparent 55%)',
-              'radial-gradient(ellipse at 48% 55%, rgba(50,30,120,.36) 0%, transparent 62%)',
-              'radial-gradient(ellipse at 10% 80%, rgba(140,100,220,.32) 0%, transparent 50%)',
-              'radial-gradient(ellipse at 86% 74%, rgba(200,80,140,.30) 0%, transparent 52%)',
-              '#06030f',
-            ].join(','),
-          }}>
+          {/* ── RIGHT: Rose photo ──────────────────────────── */}
+          <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
 
-            {/* Soft shimmer overlay */}
-            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 0%, rgba(232,154,184,.12) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 1 }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/roses.jpg"
+              alt="Garden of roses"
+              style={{
+                position: 'absolute', inset: 0,
+                width: '100%', height: '100%',
+                objectFit: 'cover', objectPosition: 'center top',
+                filter: 'brightness(0.78)',
+              }}
+            />
+
+            {/* Uniform white fade over entire image */}
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,.18)', pointerEvents: 'none', zIndex: 1 }} />
 
             {/* Bottom gradient overlay */}
             <div style={{
               position: 'absolute', bottom: 0, left: 0, right: 0, height: 280,
-              background: 'linear-gradient(to top, rgba(6,3,15,.85) 0%, rgba(6,3,15,.4) 52%, transparent 100%)',
+              background: 'linear-gradient(to top, rgba(10,4,24,.75) 0%, rgba(10,4,24,.38) 52%, transparent 100%)',
               zIndex: 2,
             }} />
 
