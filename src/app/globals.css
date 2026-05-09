@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Playfair+Display:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@200;300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400;1,9..144,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@200;300;400;500&family=Geist+Mono:wght@300;400&display=swap');
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════
@@ -91,7 +91,7 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: 'DM Sans', system-ui, sans-serif;
-  background: var(--bg);
+  background: #f7f3ff;
   color: var(--ink);
   min-height: 100vh;
   overflow-x: hidden;
@@ -409,6 +409,37 @@ body {
   --bg:      #120c24;
   --bg2:     #1e0f2e;
   --glass-subtle: rgba(255,255,255,.04);
+}
+
+/* ═══════════════════════ LandingV2 helpers ═══════════════════════ */
+.glass {
+  background: rgba(255,255,255,.42);
+  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+  border: 1px solid rgba(255,255,255,.55);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 8px 32px rgba(120,80,180,.08);
+  color: inherit;
+}
+.night-glass {
+  background: rgba(20,8,38,.55);
+  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+  border: 1px solid rgba(184,154,216,.18);
+  box-shadow: inset 0 1px 0 rgba(184,154,216,.08), 0 8px 32px rgba(0,0,0,.45);
+}
+.serif { font-family: 'Fraunces', 'Cormorant Garamond', Georgia, serif; font-optical-sizing: auto; }
+.mono  { font-family: 'Geist Mono', ui-monospace, 'Menlo', monospace; letter-spacing: .06em; }
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes pulse {
+  0%, 100% { opacity: .5; transform: scale(1); }
+  50%       { opacity: 1; transform: scale(1.4); }
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 /* ═══════════════════════ App overlay ═══════════════════════ */
