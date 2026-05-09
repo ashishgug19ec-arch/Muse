@@ -6,6 +6,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useMuseStore } from '@/lib/store';
 import { Drawer } from '@/components/Drawer';
 import { AppOverlay } from '@/components/AppOverlay';
+import { SignInModal } from '@/components/SignInModal';
 
 interface Feature {
   n: string; tag: string; title: string; it: string;
@@ -93,9 +94,8 @@ function ParticlesBg({ night }: { night: boolean }) {
    STICKY GLASS NAV — fixed pill, scroll-aware blur
 ══════════════════════════════════════════════════ */
 function GlassNav({ scrolled }: { scrolled: boolean }) {
-  const { night, toggleNight, setDrawerOpen, openPage } = useMuseStore();
+  const { night, toggleNight, setDrawerOpen, openPage, setSignInOpen } = useMuseStore();
   const { isSignedIn, isLoaded } = useUser();
-  const router = useRouter();
   const txt = night ? 'rgba(246,234,253,.9)' : '#0c0612';
 
   return (
@@ -154,7 +154,7 @@ function GlassNav({ scrolled }: { scrolled: boolean }) {
       {/* Center: links */}
       <div style={{ display: 'flex', gap: 24, flex: 1, justifyContent: 'center' }}>
         {['Discover', 'Sanctuary', 'Fan Fiction'].map(l => (
-          <button key={l} onClick={() => isSignedIn ? openPage(l.toLowerCase()) : router.push('/sign-in')}
+          <button key={l} onClick={() => isSignedIn ? openPage(l.toLowerCase()) : setSignInOpen(true)}
             style={{ fontSize: 12.5, fontWeight: 400, letterSpacing: '.01em', opacity: .82, background: 'none', border: 'none', cursor: 'pointer', color: txt, whiteSpace: 'nowrap', fontFamily: "'DM Sans', sans-serif", transition: 'opacity .25s,color .25s' }}
             onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = night ? '#e89aae' : '#7a3a8a'; }}
             onMouseLeave={e => { e.currentTarget.style.opacity = '.82'; e.currentTarget.style.color = 'inherit'; }}
@@ -176,12 +176,12 @@ function GlassNav({ scrolled }: { scrolled: boolean }) {
           </motion.button>
         ) : isLoaded ? (
           <>
-            <button onClick={() => router.push('/sign-in')}
+            <button onClick={() => setSignInOpen(true)}
               style={{ padding: '8px 18px', borderRadius: 50, fontSize: 12, fontWeight: 400, background: 'transparent', color: txt, border: `1px solid ${night ? 'rgba(184,154,216,.25)' : 'rgba(122,58,138,.18)'}`, whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
               Sign in
             </button>
             <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: .97 }}
-              onClick={() => router.push('/sign-up')}
+              onClick={() => setSignInOpen(true)}
               style={{ padding: '9px 18px', borderRadius: 50, fontSize: 12, fontWeight: 500, letterSpacing: '.02em', background: '#0c0612', color: '#f7f3ff', whiteSpace: 'nowrap', cursor: 'pointer', border: 'none', boxShadow: '0 6px 20px rgba(12,6,18,.25)', fontFamily: "'DM Sans', sans-serif" }}>
               Begin writing
             </motion.button>
@@ -827,10 +827,9 @@ function CTA({ night, onBeginWriting }: { night: boolean; onBeginWriting: () => 
    FOOTER
 ══════════════════════════════════════════════════ */
 function LandingFooter({ night }: { night: boolean }) {
-  const { openPage } = useMuseStore();
+  const { openPage, setSignInOpen } = useMuseStore();
   const { isSignedIn } = useUser();
-  const router = useRouter();
-  const go = (action: () => void) => isSignedIn ? action() : router.push('/sign-in');
+  const go = (action: () => void) => isSignedIn ? action() : setSignInOpen(true);
   const ink = night ? '#f6eafd' : '#0c0612';
   const muted = night ? 'rgba(184,154,216,.55)' : 'rgba(122,58,138,.55)';
   const bd = night ? 'rgba(184,154,216,.12)' : 'rgba(122,58,138,.08)';
@@ -838,7 +837,7 @@ function LandingFooter({ night }: { night: boolean }) {
   const cols = [
     { h: 'Write',   l: [{ label: 'Sanctuary',     action: () => go(() => openPage('sanctuary'))      }, { label: 'New poem',    action: () => go(() => openPage('new poem'))     }, { label: 'Fan fiction',    action: () => go(() => openPage('fan fiction')) }, { label: 'Ikigai journal', action: () => go(() => openPage('ikigai journal')) }] },
     { h: 'Read',    l: [{ label: 'Discover',       action: () => go(() => openPage('explore'))        }, { label: 'Featured poets', action: () => go(() => openPage('explore'))  }, { label: 'Trending',       action: () => go(() => openPage('explore'))     }, { label: 'Collections',    action: () => go(() => openPage('collections'))   }] },
-    { h: 'Account', l: [{ label: 'Sign in',        action: () => router.push('/sign-in')    }, { label: 'Settings',       action: () => go(() => openPage('settings'))    }, { label: 'Help',           action: () => {}                         }] },
+    { h: 'Account', l: [{ label: 'Sign in',        action: () => setSignInOpen(true)        }, { label: 'Settings',       action: () => go(() => openPage('settings'))    }, { label: 'Help',           action: () => {}                         }] },
     { h: 'Muse',    l: [{ label: 'About',          action: () => {}                         }, { label: 'Manifesto',   action: () => {}                       }, { label: 'Careers',        action: () => {}                      }, { label: 'Press',          action: () => {}                         }] },
   ];
 
@@ -889,7 +888,7 @@ function LandingFooter({ night }: { night: boolean }) {
    MAIN EXPORT
 ══════════════════════════════════════════════════ */
 export default function HomeLanding() {
-  const { night, openPage } = useMuseStore();
+  const { night, openPage, setSignInOpen } = useMuseStore();
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -910,7 +909,7 @@ export default function HomeLanding() {
   function handleBeginWriting() {
     if (!isLoaded) return;
     if (isSignedIn) openPage('write');
-    else router.push('/sign-up');
+    else setSignInOpen(true);
   }
 
   return (
@@ -919,6 +918,7 @@ export default function HomeLanding() {
       <ParticlesBg night={night} />
       <Drawer />
       <AppOverlay />
+      <SignInModal />
       <GlassNav scrolled={scrolled} />
       <div style={{ position: 'relative', zIndex: 2 }}>
         <Hero night={night} onBeginWriting={handleBeginWriting} />

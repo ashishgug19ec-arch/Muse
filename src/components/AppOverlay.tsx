@@ -1,6 +1,5 @@
 'use client';
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { useMuseStore } from '@/lib/store';
 import { MuseLogo } from './ui/MuseLogo';
@@ -67,18 +66,17 @@ const NAV_LINKS = [
 ];
 
 export function AppOverlay() {
-  const { activePage, closePage, night, toggleNight, openPage } = useMuseStore();
+  const { activePage, closePage, night, toggleNight, openPage, setSignInOpen } = useMuseStore();
   const { isSignedIn, isLoaded } = useUser();
-  const router = useRouter();
   const pageKey = activePage?.toLowerCase() ?? '';
   const Page = pageKey ? PAGE_MAP[pageKey] : null;
 
   useEffect(() => {
     if (isLoaded && !isSignedIn && activePage) {
       closePage();
-      router.push('/sign-in');
+      setSignInOpen(true);
     }
-  }, [isLoaded, isSignedIn, activePage, closePage, router]);
+  }, [isLoaded, isSignedIn, activePage, closePage, setSignInOpen]);
 
   if (!activePage) return null;
   if (isLoaded && !isSignedIn) return null;
