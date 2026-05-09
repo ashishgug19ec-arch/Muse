@@ -159,8 +159,8 @@ export function SignInModal() {
 
                 <h3 style={{ fontFamily: "'Fraunces','Cormorant Garamond',Georgia,serif", fontOpticalSizing: 'auto', fontSize: 38, fontWeight: 300, letterSpacing: '-.045em', lineHeight: 1.05, marginBottom: 18, color: night ? '#f6eafd' : '#0c0612' }}>
                   {mode === 'signin'
-                    ? <><span>Welcome</span><br /><span>back, <em style={{ fontStyle: 'italic' }}>poet.</em></span></>
-                    : <><span>Plant your</span><br /><em style={{ fontStyle: 'italic' }}>first poem.</em></>}
+                    ? <><span>Welcome</span><br /><span>back, <em style={{ fontStyle: 'italic', background: 'linear-gradient(90deg,#7a3a8a 0%,#e89aae 25%,#b89ad8 50%,#e89aae 75%,#7a3a8a 100%)', backgroundSize: '200% 100%', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent', animation: 'shimmer 8s linear infinite' }}>poet.</em></span></>
+                    : <><span>Plant your</span><br /><em style={{ fontStyle: 'italic', background: 'linear-gradient(90deg,#7a3a8a 0%,#e89aae 25%,#b89ad8 50%,#e89aae 75%,#7a3a8a 100%)', backgroundSize: '200% 100%', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent', animation: 'shimmer 8s linear infinite' }}>first poem.</em></>}
                 </h3>
                 <p style={{ fontFamily: "'Fraunces','Cormorant Garamond',Georgia,serif", fontOpticalSizing: 'auto', fontSize: 15, fontStyle: 'italic', opacity: .78, lineHeight: 1.55, maxWidth: 300, fontWeight: 300, color: night ? '#c8b4dc' : '#3a2a4a' }}>
                   {mode === 'signin' ? 'Your sanctuary is ready. The page has been waiting.' : 'Free forever. No algorithm. Just your words.'}
@@ -190,7 +190,7 @@ export function SignInModal() {
                 ))}
               </div>
 
-              <div style={{ fontFamily: "'Fraunces','Cormorant Garamond',Georgia,serif", fontOpticalSizing: 'auto', fontSize: 26, fontWeight: 300, letterSpacing: '-.045em', marginBottom: 6, color: night ? '#f6eafd' : '#0c0612' }}>
+              <div style={{ fontFamily: "'Fraunces','Cormorant Garamond',Georgia,serif", fontOpticalSizing: 'auto', fontSize: 26, fontWeight: 300, letterSpacing: '-.045em', marginBottom: 6, background: 'linear-gradient(90deg,#7a3a8a 0%,#e89aae 25%,#b89ad8 50%,#e89aae 75%,#7a3a8a 100%)', backgroundSize: '200% 100%', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent', animation: 'shimmer 8s linear infinite' }}>
                 {mode === 'signin' ? 'Step into the sanctuary.' : 'Begin your garden.'}
               </div>
               <div style={{ fontSize: 13, opacity: .7, marginBottom: 24, color: night ? '#c8b4dc' : '#7a6890', fontFamily: "'DM Sans',sans-serif" }}>
