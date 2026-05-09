@@ -111,15 +111,14 @@ export function SignInModal() {
             onClick={close}
             style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,.55)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}
           />
+          <div style={{ position: 'fixed', inset: 0, zIndex: 301, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
           <motion.div
             initial={{ opacity: 0, scale: .92, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: .95 }}
             transition={{ type: 'spring', damping: 26, stiffness: 260 }}
             style={{
-              position: 'fixed', top: '50%', left: '50%',
-              transform: 'translate(-50%,-50%)',
-              zIndex: 301,
+              pointerEvents: 'all',
               width: 'min(880px,94vw)', maxHeight: '92vh', overflow: 'hidden',
               borderRadius: 30,
               display: 'grid', gridTemplateColumns: '1fr 1.1fr',
@@ -266,6 +265,7 @@ export function SignInModal() {
               </AnimatePresence>
             </div>
           </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
