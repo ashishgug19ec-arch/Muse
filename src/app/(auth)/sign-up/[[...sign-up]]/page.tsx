@@ -151,7 +151,7 @@ export default function SignUpPage() {
                   ))}
                 </g>
               </svg>
-              <div style={{ fontFamily:"'Fraunces','Cormorant Garamond',Georgia,serif", fontOpticalSizing: 'auto', fontSize: 24, color: '#1a0a2e', fontWeight: 400, letterSpacing: '.03em', marginTop: 10 }}>Muse</div>
+              <div style={{ fontFamily:"'Fraunces','Cormorant Garamond',Georgia,serif", fontOpticalSizing: 'auto', fontSize: 24, color: '#1a0a2e', fontWeight: 300, letterSpacing: '-.045em', marginTop: 10 }}>Muse</div>
               <div style={{ fontSize: 9, color: '#c4aedd', letterSpacing: '.18em', textTransform: 'uppercase', marginTop: 3 }}>garden of poetry</div>
             </div>
 
@@ -167,9 +167,9 @@ export default function SignUpPage() {
                   <h1 style={{
                     fontFamily: "'Fraunces','Cormorant Garamond',Georgia,serif",
                     fontOpticalSizing: 'auto',
-                    fontSize: 28, fontWeight: 400, fontStyle: 'italic',
+                    fontSize: 28, fontWeight: 300, fontStyle: 'normal',
                     color: '#0e0616', lineHeight: 1.15,
-                    letterSpacing: '-.01em',
+                    letterSpacing: '-.045em',
                     margin: '0 0 32px',
                   }}>
                     Let your words bloom.
@@ -240,9 +240,9 @@ export default function SignUpPage() {
                   <h1 style={{
                     fontFamily: "'Fraunces','Cormorant Garamond',Georgia,serif",
                     fontOpticalSizing: 'auto',
-                    fontSize: 38, fontWeight: 400, fontStyle: 'italic',
+                    fontSize: 38, fontWeight: 300, fontStyle: 'normal',
                     color: '#0e0616', lineHeight: 1.1,
-                    letterSpacing: '-.01em',
+                    letterSpacing: '-.045em',
                     margin: '0 0 8px',
                   }}>
                     Check your<br />inbox. 🌸
@@ -325,11 +325,11 @@ export default function SignUpPage() {
               <p style={{
                 fontFamily: "'Fraunces','Cormorant Garamond',Georgia,serif",
                 fontOpticalSizing: 'auto',
-                fontSize: 42, fontWeight: 400, fontStyle: 'italic',
+                fontSize: 42, fontWeight: 300, fontStyle: 'normal',
                 color: '#fff',
                 lineHeight: 1.2, margin: 0,
                 textShadow: '0 3px 18px rgba(0,0,0,.4)',
-                letterSpacing: '-.01em',
+                letterSpacing: '-.045em',
               }}>
                 Write the poem<br />only you can write.
               </p>
