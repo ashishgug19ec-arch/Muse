@@ -687,6 +687,7 @@ function CinematicSection({ night }: { night: boolean }) {
       <motion.div style={{ position: 'absolute', inset: '-15% 0', y, zIndex: 0 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/mountains.jpg" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }} />
+        {night && <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,4,24,.55)' }} />}
       </motion.div>
 
 
