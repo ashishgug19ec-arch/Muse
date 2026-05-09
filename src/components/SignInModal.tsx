@@ -119,7 +119,7 @@ export function SignInModal() {
             transition={{ type: 'spring', damping: 26, stiffness: 260 }}
             style={{
               pointerEvents: 'all',
-              width: 'min(880px,94vw)', maxHeight: '92vh', overflow: 'hidden',
+              width: 'min(880px,94vw)', height: 'min(580px,92vh)', overflow: 'hidden',
               borderRadius: 30,
               display: 'grid', gridTemplateColumns: '1fr 1.1fr',
               background: night ? 'rgba(20,8,38,.9)' : 'rgba(255,255,255,.92)',
@@ -133,7 +133,7 @@ export function SignInModal() {
             <div style={{
               position: 'relative', padding: 40,
               display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-              background: leftBg, minHeight: 480, overflow: 'hidden',
+              background: leftBg, overflow: 'hidden',
             }}>
               <div style={{ position: 'absolute', top: -60, right: -60, width: 240, aspectRatio: '1', borderRadius: '50%', background: night ? 'radial-gradient(circle,rgba(232,154,184,.4),transparent 70%)' : 'radial-gradient(circle,rgba(255,255,255,.7),transparent 70%)', filter: 'blur(20px)' }} />
               <div style={{ position: 'absolute', bottom: -40, left: -40, width: 180, aspectRatio: '1', borderRadius: '50%', background: night ? 'radial-gradient(circle,rgba(184,154,216,.4),transparent 70%)' : 'radial-gradient(circle,rgba(212,184,232,.7),transparent 70%)', filter: 'blur(20px)' }} />
