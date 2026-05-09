@@ -691,8 +691,6 @@ function CinematicSection({ night }: { night: boolean }) {
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(20,8,40,.45)' }} />
       </motion.div>
 
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 140, background: `linear-gradient(180deg,${night ? '#0a0518' : '#f7f3ff'},transparent)`, zIndex: 2, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 140, background: `linear-gradient(0deg,${night ? '#0a0518' : '#f7f3ff'},transparent)`, zIndex: 2, pointerEvents: 'none' }} />
 
 
       <div style={{ position: 'relative', zIndex: 5, maxWidth: 1280, margin: '0 auto', textAlign: 'center' }}>
