@@ -706,7 +706,7 @@ function CinematicSection({ night }: { night: boolean }) {
         </motion.h2>
         <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: .85 }}
           transition={{ duration: 1, delay: .4 }} viewport={{ once: true }}
-          className="serif" style={{ fontSize: 20, fontStyle: 'italic', fontWeight: 300, marginTop: 40, maxWidth: 680, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6, color: '#c8b4dc' }}>
+          className="serif" style={{ fontSize: 20, fontStyle: 'italic', fontWeight: 300, marginTop: 40, maxWidth: 680, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6, color: '#fff' }}>
           Not the loud heart that posts. Not the anxious heart that performs. The still heart — the one that knows what it knows, even when no one is watching.
         </motion.p>
       </div>
