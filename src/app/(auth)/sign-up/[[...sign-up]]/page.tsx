@@ -23,7 +23,7 @@ const QUOTES = [
 ];
 
 export default function SignUpPage() {
-  const { isLoaded, signUp, setActive } = useSignUp();
+  const { isLoaded, signUp, setActive } = useSignUp() as any;
   const router = useRouter();
   const [step, setStep] = useState<Step>('info');
   const [firstName, setFirstName] = useState('');
