@@ -600,7 +600,13 @@ function FeatureRow({ f, flip, night }: { f: Feature; flip: boolean; night: bool
     <div ref={ref} style={{ padding: '48px 0', maxWidth: 1320, margin: '0 auto' }}>
       <motion.div style={{ opacity }}>
         <div style={{ display: 'grid', gridTemplateColumns: flip ? '5fr 7fr' : '7fr 5fr', gap: 60, alignItems: 'center' }}>
-          <div style={{ order: flip ? 2 : 1 }}>
+          <motion.div
+            style={{ order: flip ? 2 : 1 }}
+            initial={{ opacity: 0, x: flip ? 100 : -100 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, ease: [.16, 1, .3, 1], delay: .1 }}
+            viewport={{ once: true, margin: '-80px' }}
+          >
             <div className="serif" style={{ fontSize: 140, fontWeight: 300, lineHeight: .85, letterSpacing: '-.05em', color: 'transparent', WebkitTextStroke: `1.4px ${night ? 'rgba(184,154,216,.35)' : 'rgba(122,58,138,.28)'}`, marginBottom: -12, marginLeft: -6 }}>{f.n}</div>
             <div className="mono" style={{ fontSize: 10, letterSpacing: '.28em', opacity: .65, marginBottom: 16, color: night ? '#b89ad8' : '#7a3a8a' }}>{f.tag}</div>
             <h3 className="serif" style={{ fontSize: 54, fontWeight: 300, lineHeight: 1.02, letterSpacing: '-.035em', margin: '0 0 6px', color: ink }}>{f.title}</h3>
@@ -617,8 +623,14 @@ function FeatureRow({ f, flip, night }: { f: Feature; flip: boolean; night: bool
             <button className={`serif ${night ? 'night-glass' : 'glass'}`} style={{ padding: '13px 24px', borderRadius: 50, fontSize: 13, fontStyle: 'italic', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 10, color: ink }}>
               Explore {f.title} →
             </button>
-          </div>
-          <motion.div style={{ y, order: flip ? 1 : 2 }}>
+          </motion.div>
+          <motion.div
+            style={{ y, order: flip ? 1 : 2 }}
+            initial={{ opacity: 0, x: flip ? -160 : 160 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, ease: [.16, 1, .3, 1] }}
+            viewport={{ once: true, margin: '-80px' }}
+          >
             <FeatureArt kind={f.art} night={night} />
           </motion.div>
         </div>
