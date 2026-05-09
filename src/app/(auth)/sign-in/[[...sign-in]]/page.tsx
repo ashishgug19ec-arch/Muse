@@ -304,9 +304,10 @@ export default function SignInPage() {
             {/* Text overlay */}
             <div style={{ position:'absolute', bottom:44, left:42, zIndex:3 }}>
               <p style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 38, fontWeight: 700, fontStyle: 'normal',
-                color: '#fff', lineHeight: 1.25, margin: 0,
+                fontFamily: "'Fraunces','Cormorant Garamond',Georgia,serif",
+                fontOpticalSizing: 'auto',
+                fontSize: 42, fontWeight: 400, fontStyle: 'italic',
+                color: '#fff', lineHeight: 1.2, margin: 0,
                 textShadow: '0 3px 18px rgba(0,0,0,.4)',
                 letterSpacing: '-.01em',
               }}>
