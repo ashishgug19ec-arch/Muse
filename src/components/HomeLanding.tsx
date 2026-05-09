@@ -682,12 +682,20 @@ function CinematicSection({ night }: { night: boolean }) {
   const y = useTransform(scrollYProgress, [0, 1], ['-15%', '15%']);
 
   return (
-    <section ref={ref} style={{ position: 'relative', padding: '120px 24px 140px', color: '#f6eafd', overflow: 'hidden', zIndex: 5, background: 'linear-gradient(180deg,#0a0518 0%,#1a0a30 30%,#2a1a48 70%,#1a0a30 100%)' }}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 120, background: `linear-gradient(180deg,${night ? '#0a0518' : '#f7f3ff'},transparent)`, zIndex: 2, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 120, background: `linear-gradient(0deg,${night ? '#0a0518' : '#f7f3ff'},transparent)`, zIndex: 2, pointerEvents: 'none' }} />
+    <section ref={ref} style={{ position: 'relative', padding: '120px 24px 140px', color: '#f6eafd', overflow: 'hidden', zIndex: 5 }}>
+      {/* Background image with parallax */}
+      <motion.div style={{ position: 'absolute', inset: '-15% 0', y, zIndex: 0 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/mountains.jpg" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }} />
+        {/* Dark overlay so text stays readable */}
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(20,8,40,.45)' }} />
+      </motion.div>
+
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 140, background: `linear-gradient(180deg,${night ? '#0a0518' : '#f7f3ff'},transparent)`, zIndex: 2, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 140, background: `linear-gradient(0deg,${night ? '#0a0518' : '#f7f3ff'},transparent)`, zIndex: 2, pointerEvents: 'none' }} />
 
       {/* Star field + moon */}
-      <motion.div style={{ position: 'absolute', inset: '-10% 0', y, zIndex: 1, opacity: .85 }}>
+      <motion.div style={{ position: 'absolute', inset: '-10% 0', y, zIndex: 1, opacity: .5 }}>
         <svg viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice" style={{ width: '100%', height: '100%' }}>
           {[...Array(120)].map((_, i) => {
             const sx = (i * 173) % 1440, sy = (i * 97) % 1000;
