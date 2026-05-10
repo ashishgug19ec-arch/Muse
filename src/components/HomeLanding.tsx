@@ -152,8 +152,8 @@ function GlassNav({ scrolled }: { scrolled: boolean }) {
       </div>
 
       {/* Center: links */}
-      <div style={{ display: 'flex', gap: 24, flex: 1, justifyContent: 'center' }}>
-        {['Discover', 'Sanctuary', 'Fan Fiction'].map(l => (
+      <div style={{ display: 'flex', gap: 28, flex: 1, justifyContent: 'center' }}>
+        {['Dashboard', 'Poems', 'Fan Fiction', 'Collections'].map(l => (
           <button key={l} onClick={() => isSignedIn ? openPage(l.toLowerCase()) : setSignInOpen(true)}
             style={{ fontSize: 12.5, fontWeight: 400, letterSpacing: '.01em', opacity: .82, background: 'none', border: 'none', cursor: 'pointer', color: txt, whiteSpace: 'nowrap', fontFamily: "'DM Sans', sans-serif", transition: 'opacity .25s,color .25s' }}
             onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = night ? '#e89aae' : '#7a3a8a'; }}
