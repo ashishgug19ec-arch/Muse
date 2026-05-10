@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WriteToolbar } from '@/components/ui/WriteToolbar';
 
-interface Props { night: boolean; }
+interface Props { night: boolean; defaultView?: View; }
 
 interface Fanfic {
   id: string;
@@ -42,8 +42,8 @@ const ficGrads = [
 const fadeUp = { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.34, 1.2, 0.64, 1] } } };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 
-export function PageFanFiction({ night }: Props) {
-  const [view, setView] = useState<View>('list');
+export function PageFanFiction({ night, defaultView }: Props) {
+  const [view, setView] = useState<View>(defaultView ?? 'list');
   const [fics, setFics] = useState<Fanfic[]>([]);
   const [loading, setLoading] = useState(true);
   const [fic, setFic] = useState<Fanfic | null>(null);

@@ -1,6 +1,6 @@
 'use client';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { useMuseStore } from '@/lib/store';
 
 interface Props { night: boolean; }
 
@@ -15,7 +15,7 @@ const options = [
     icon: '✍️',
     title: 'Poem',
     desc: 'A distraction-free sanctuary where your words bloom in silence.',
-    page: 'Sanctuary' as const,
+    route: '/sanctuary',
     cta: 'Write a poem',
     light: {
       bg: 'linear-gradient(160deg,rgba(238,230,255,.95),rgba(252,228,240,.85))',
@@ -38,7 +38,7 @@ const options = [
     icon: '🌙',
     title: 'Fan Fiction',
     desc: 'Poetic reimaginings of the worlds and characters you love.',
-    page: 'FanFiction' as const,
+    route: '/fan-fiction/new',
     cta: 'Write fan fiction',
     light: {
       bg: 'linear-gradient(160deg,#1e1030,#2a1428)',
@@ -61,7 +61,7 @@ const options = [
     icon: '🌿',
     title: 'Quick scrap',
     desc: 'Capture a fragment before it slips — a line, a phrase, a fleeting image.',
-    page: 'Scraps' as const,
+    route: '/scraps',
     cta: 'Save a scrap',
     light: {
       bg: 'linear-gradient(160deg,rgba(228,248,234,.95),rgba(232,252,240,.88))',
@@ -83,7 +83,7 @@ const options = [
 ];
 
 export function PageBeginWriting({ night }: Props) {
-  const { openPage } = useMuseStore();
+  const router = useRouter();
   const n = night;
   const ink  = n ? 'rgba(230,220,255,.9)'  : '#1e1628';
   const ink3 = n ? 'rgba(160,140,200,.55)' : '#8a7aa0';
@@ -132,7 +132,7 @@ export function PageBeginWriting({ night }: Props) {
             <motion.button
               key={opt.title}
               variants={fadeUp}
-              onClick={() => openPage(opt.page)}
+              onClick={() => router.push(opt.route)}
               whileHover={{ y: -6, scale: 1.012 }}
               whileTap={{ scale: .98 }}
               style={{

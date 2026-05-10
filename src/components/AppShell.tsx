@@ -24,14 +24,19 @@ export function AppShell({ children, title }: { children: React.ReactNode; title
 
   if (!isLoaded || !isSignedIn) return null;
 
-  const bg = night
-    ? 'linear-gradient(160deg,#1a0c2e 0%,#0f0620 100%)'
-    : 'linear-gradient(160deg,rgba(248,244,255,.98) 0%,rgba(255,243,250,.97) 100%)';
-
   return (
-    <div style={{ minHeight: '100vh', background: bg }}>
-      <GlassNav scrolled currentPage={title} showBack />
-      <div style={{ paddingTop: 82 }}>
+    <div style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden',
+      background: night ? '#06030f' : 'linear-gradient(160deg,rgba(248,244,255,.98) 0%,rgba(255,243,250,.97) 100%)' }}>
+      {night && (
+        <>
+          <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
+            background: 'radial-gradient(ellipse at 15% 15%,rgba(124,58,237,.22),transparent 50%),radial-gradient(ellipse at 85% 75%,rgba(208,100,136,.18),transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(92,38,180,.1),transparent 60%)' }} />
+          <div style={{ position: 'fixed', top: '30%', left: '-5%', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle,rgba(124,58,237,.12),transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 0 }} />
+          <div style={{ position: 'fixed', bottom: '10%', right: '-5%', width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle,rgba(232,154,184,.1),transparent 70%)', filter: 'blur(50px)', pointerEvents: 'none', zIndex: 0 }} />
+        </>
+      )}
+      <GlassNav scrolled currentPage={title} />
+      <div style={{ paddingTop: 82, position: 'relative', zIndex: 1 }}>
         {children}
       </div>
     </div>

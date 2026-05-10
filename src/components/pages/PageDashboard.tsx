@@ -48,7 +48,7 @@ const statIcons = [
 ];
 
 export function PageDashboard({ night }: Props) {
-  const { openPage: onNav } = useMuseStore();
+  const { openPage: onNav, nickname } = useMuseStore();
   const { user } = useUser();
   const [data, setData] = useState<DashboardData | null>(null);
   const [hoveredDay, setHoveredDay] = useState<number | null>(null);
@@ -89,7 +89,7 @@ export function PageDashboard({ night }: Props) {
         <motion.div variants={fadeUp} style={{ fontFamily: "'Playfair Display',serif", fontSize: 36, fontWeight: 300, color: ink, letterSpacing: '-.03em', lineHeight: 1.2 }}>
           {timeGreeting()},{' '}
           <em style={{ fontStyle: 'italic', background: 'linear-gradient(135deg,#c084fc,#f472b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            {user?.firstName ?? user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ?? '…'}
+            {nickname ? nickname.charAt(0).toUpperCase() + nickname.slice(1) : (user?.firstName ?? user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ?? '…')}
           </em>
         </motion.div>
         <motion.div variants={fadeUp} style={{ fontSize: 13, color: ink3, marginTop: 6, fontWeight: 300 }}>

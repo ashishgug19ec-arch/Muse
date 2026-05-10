@@ -14,10 +14,9 @@ const NAV_ROUTES: Record<string, string> = {
 interface GlassNavProps {
   scrolled?: boolean;
   currentPage?: string;
-  showBack?: boolean;
 }
 
-export function GlassNav({ scrolled = true, currentPage, showBack }: GlassNavProps) {
+export function GlassNav({ scrolled = true, currentPage }: GlassNavProps) {
   const { night, toggleNight, setDrawerOpen, setSignInOpen, nickname } = useMuseStore();
   const { isSignedIn, isLoaded, user } = useUser();
   const router = useRouter();
@@ -55,13 +54,7 @@ export function GlassNav({ scrolled = true, currentPage, showBack }: GlassNavPro
 
       {/* Left: back? + hamburger + logo + current page */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        {showBack && (
-          <button onClick={() => router.back()} aria-label="Back"
-            style={{ width: 30, height: 30, borderRadius: '50%', background: 'transparent', border: `1px solid ${night ? 'rgba(184,154,216,.22)' : 'rgba(122,58,138,.18)'}`, cursor: 'pointer', fontSize: 14, color: night ? 'rgba(220,200,255,.8)' : '#7a3a8a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            ←
-          </button>
-        )}
-        <button onClick={() => setDrawerOpen(true)} aria-label="Menu"
+<button onClick={() => setDrawerOpen(true)} aria-label="Menu"
           style={{ width: 34, height: 34, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 4, background: 'transparent', padding: 0, border: 'none', cursor: 'pointer' }}>
           {[0, 1, 2].map(i => (
             <div key={i} style={{ width: 16, height: 1.4, background: night ? 'rgba(220,200,255,.85)' : '#2a1a3a', borderRadius: 2 }} />
@@ -135,11 +128,6 @@ export function GlassNav({ scrolled = true, currentPage, showBack }: GlassNavPro
                 : <span style={{ fontSize: 12, fontWeight: 600, color: '#fff', letterSpacing: '.02em', fontFamily: "'DM Sans', sans-serif" }}>{initials}</span>
               }
             </div>
-            {nickname && (
-              <span style={{ fontSize: 11.5, fontWeight: 400, color: night ? 'rgba(220,200,255,.75)' : '#5a3a7a', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap' }}>
-                @{nickname}
-              </span>
-            )}
           </motion.button>
         ) : isLoaded ? (
           <>

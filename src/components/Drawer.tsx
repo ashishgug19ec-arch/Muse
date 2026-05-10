@@ -40,7 +40,8 @@ export function Drawer() {
   const clerkName = user?.firstName
     ? `${user.firstName}${user.lastName ? ' ' + user.lastName : ''}`
     : user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ?? 'poet';
-  const displayName = nickname ?? clerkName;
+  const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  const displayName = nickname ? cap(nickname) : clerkName;
 
   const PAGE_ROUTES: Record<string, string> = {
     write: '/write',
