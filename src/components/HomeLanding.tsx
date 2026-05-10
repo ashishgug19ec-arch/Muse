@@ -18,7 +18,7 @@ function MeshOrbsBg({ night }: { night: boolean }) {
   useEffect(() => {
     const cv = ref.current; if (!cv) return;
     const ctx = cv.getContext('2d'); if (!ctx) return;
-    let raf: number, t = 0;
+    let raf: number;
     const orbs = night ? [
       { x: .18, y: .12, r: .55, c: '120,80,200',  s: .00018, a: .32 },
       { x: .78, y: .22, r: .5,  c: '90,40,150',   s: .00022, a: .36 },
@@ -41,21 +41,20 @@ function MeshOrbsBg({ night }: { night: boolean }) {
       cv.style.height = window.innerHeight + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
-    function draw() {
+    function draw(ts: number) {
       const w = window.innerWidth, h = window.innerHeight;
       ctx.clearRect(0, 0, w, h);
-      if (night) { ctx.fillStyle = '#06030f'; ctx.fillRect(0, 0, w, h); }
       orbs.forEach((o, i) => {
-        const ox = o.x * w + Math.sin(t * o.s * 1000 + i * 1.42) * w * .06;
-        const oy = o.y * h + Math.cos(t * o.s * 820  + i * 1.78) * h * .04;
+        const ox = o.x * w + Math.sin(ts * 0.00006 + i * 1.42) * w * .05;
+        const oy = o.y * h + Math.cos(ts * 0.00005 + i * 1.78) * h * .04;
         const g = ctx.createRadialGradient(ox, oy, 0, ox, oy, o.r * w);
         g.addColorStop(0, `rgba(${o.c},${o.a})`);
         g.addColorStop(1, `rgba(${o.c},0)`);
         ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
       });
-      t += 16; raf = requestAnimationFrame(draw);
+      raf = requestAnimationFrame(draw);
     }
-    resize(); draw();
+    resize(); raf = requestAnimationFrame(draw);
     window.addEventListener('resize', resize);
     return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
   }, [night]);
@@ -707,7 +706,7 @@ function CinematicSection({ night }: { night: boolean }) {
       <motion.div style={{ position: 'absolute', inset: '-15% 0', y, zIndex: 0 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/mountains.jpg" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }} />
-        {night && <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,4,24,.55)' }} />}
+        {night && <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,4,24,.45)' }} />}
       </motion.div>
 
 
@@ -931,9 +930,8 @@ export default function HomeLanding() {
   }
 
   return (
-    <div style={{ overflowX: 'hidden', position: 'relative', minHeight: '100vh' }}>
+    <div style={{ overflowX: 'hidden', position: 'relative', minHeight: '100vh', background: night ? '#06030f' : undefined }}>
       <MeshOrbsBg night={night} />
-      <ParticlesBg night={night} />
       <GlassNav scrolled={scrolled} />
       <div style={{ position: 'relative', zIndex: 2 }}>
         <Hero night={night} onBeginWriting={handleBeginWriting} />
