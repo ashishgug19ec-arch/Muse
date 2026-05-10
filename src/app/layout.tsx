@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { AppOverlay } from "@/components/AppOverlay";
+import { Drawer } from "@/components/Drawer";
+import { SignInModal } from "@/components/SignInModal";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,7 +14,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <ClerkProvider>
       <html lang="en">
-        <body suppressHydrationWarning>{children}</body>
+        <body suppressHydrationWarning>
+          <Drawer />
+          <AppOverlay />
+          <SignInModal />
+          {children}
+        </body>
       </html>
     </ClerkProvider>
   );

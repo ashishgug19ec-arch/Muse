@@ -4,9 +4,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useMuseStore } from '@/lib/store';
-import { Drawer } from '@/components/Drawer';
-import { AppOverlay } from '@/components/AppOverlay';
-import { SignInModal } from '@/components/SignInModal';
 
 interface Feature {
   n: string; tag: string; title: string; it: string;
@@ -93,9 +90,20 @@ function ParticlesBg({ night }: { night: boolean }) {
 /* ══════════════════════════════════════════════════
    STICKY GLASS NAV — fixed pill, scroll-aware blur
 ══════════════════════════════════════════════════ */
+const NAV_ROUTES: Record<string, string> = {
+  'Dashboard':   '/dashboard',
+  'Poems':       '/poems',
+  'Fan Fiction': '/fan-fiction',
+  'Collections': '/collections',
+};
+
 function GlassNav({ scrolled }: { scrolled: boolean }) {
-  const { night, toggleNight, setDrawerOpen, openPage, setSignInOpen } = useMuseStore();
-  const { isSignedIn, isLoaded } = useUser();
+  const { night, toggleNight, setDrawerOpen, setSignInOpen } = useMuseStore();
+  const { isSignedIn, isLoaded, user } = useUser();
+  const router = useRouter();
+  const initials = user?.firstName
+    ? (user.firstName[0] + (user.lastName?.[0] ?? '')).toUpperCase()
+    : user?.emailAddresses?.[0]?.emailAddress?.[0]?.toUpperCase() ?? '?';
   const txt = night ? 'rgba(246,234,253,.9)' : '#0c0612';
 
   return (
@@ -154,7 +162,7 @@ function GlassNav({ scrolled }: { scrolled: boolean }) {
       {/* Center: links */}
       <div style={{ display: 'flex', gap: 28, flex: 1, justifyContent: 'center' }}>
         {['Dashboard', 'Poems', 'Fan Fiction', 'Collections'].map(l => (
-          <button key={l} onClick={() => isSignedIn ? openPage(l.toLowerCase()) : setSignInOpen(true)}
+          <button key={l} onClick={() => isSignedIn ? router.push(NAV_ROUTES[l]) : setSignInOpen(true)}
             style={{ fontSize: 12.5, fontWeight: 400, letterSpacing: '.01em', opacity: .82, background: 'none', border: 'none', cursor: 'pointer', color: txt, whiteSpace: 'nowrap', fontFamily: "'DM Sans', sans-serif", transition: 'opacity .25s,color .25s' }}
             onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = night ? '#e89aae' : '#7a3a8a'; }}
             onMouseLeave={e => { e.currentTarget.style.opacity = '.82'; e.currentTarget.style.color = 'inherit'; }}
@@ -169,10 +177,22 @@ function GlassNav({ scrolled }: { scrolled: boolean }) {
           {night ? '☾' : '☉'}
         </button>
         {isLoaded && isSignedIn ? (
-          <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: .97 }}
-            onClick={() => openPage('write')}
-            style={{ padding: '9px 18px', borderRadius: 50, fontSize: 12, fontWeight: 500, letterSpacing: '.02em', background: '#0c0612', color: '#f7f3ff', whiteSpace: 'nowrap', cursor: 'pointer', border: 'none', boxShadow: '0 6px 20px rgba(12,6,18,.25)', fontFamily: "'DM Sans', sans-serif" }}>
-            Begin writing
+          <motion.button whileHover={{ scale: 1.06 }} whileTap={{ scale: .94 }}
+            onClick={() => router.push('/profile')}
+            title="My profile"
+            style={{
+              width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+              background: user?.imageUrl ? 'transparent' : 'linear-gradient(135deg,#7a3a8a,#e89aae)',
+              border: `2px solid ${night ? 'rgba(184,154,216,.4)' : 'rgba(122,58,138,.3)'}`,
+              cursor: 'pointer', overflow: 'hidden',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 4px 14px rgba(122,58,138,.25)',
+              padding: 0,
+            }}>
+            {user?.imageUrl
+              ? <img src={user.imageUrl} alt="profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : <span style={{ fontSize: 12, fontWeight: 600, color: '#fff', letterSpacing: '.02em', fontFamily: "'DM Sans', sans-serif" }}>{initials}</span>
+            }
           </motion.button>
         ) : isLoaded ? (
           <>
@@ -824,18 +844,19 @@ function CTA({ night, onBeginWriting }: { night: boolean; onBeginWriting: () => 
    FOOTER
 ══════════════════════════════════════════════════ */
 function LandingFooter({ night }: { night: boolean }) {
-  const { openPage, setSignInOpen } = useMuseStore();
+  const { setSignInOpen } = useMuseStore();
   const { isSignedIn } = useUser();
-  const go = (action: () => void) => isSignedIn ? action() : setSignInOpen(true);
+  const router = useRouter();
+  const go = (route: string) => isSignedIn ? router.push(route) : setSignInOpen(true);
   const ink = night ? '#f6eafd' : '#0c0612';
   const muted = night ? 'rgba(184,154,216,.55)' : 'rgba(122,58,138,.55)';
   const bd = night ? 'rgba(184,154,216,.12)' : 'rgba(122,58,138,.08)';
   const lnk = night ? 'rgba(200,180,220,.78)' : 'rgba(58,42,74,.78)';
   const cols = [
-    { h: 'Write',   l: [{ label: 'Sanctuary',     action: () => go(() => openPage('sanctuary'))      }, { label: 'New poem',    action: () => go(() => openPage('new poem'))     }, { label: 'Fan fiction',    action: () => go(() => openPage('fan fiction')) }, { label: 'Ikigai journal', action: () => go(() => openPage('ikigai journal')) }] },
-    { h: 'Read',    l: [{ label: 'Discover',       action: () => go(() => openPage('explore'))        }, { label: 'Featured poets', action: () => go(() => openPage('explore'))  }, { label: 'Trending',       action: () => go(() => openPage('explore'))     }, { label: 'Collections',    action: () => go(() => openPage('collections'))   }] },
-    { h: 'Account', l: [{ label: 'Sign in',        action: () => setSignInOpen(true)        }, { label: 'Settings',       action: () => go(() => openPage('settings'))    }, { label: 'Help',           action: () => {}                         }] },
-    { h: 'Muse',    l: [{ label: 'About',          action: () => {}                         }, { label: 'Manifesto',   action: () => {}                       }, { label: 'Careers',        action: () => {}                      }, { label: 'Press',          action: () => {}                         }] },
+    { h: 'Write',   l: [{ label: 'Sanctuary',     action: () => go('/sanctuary')   }, { label: 'New poem',       action: () => go('/new-poem')    }, { label: 'Fan fiction',    action: () => go('/fan-fiction') }, { label: 'Ikigai journal', action: () => go('/ikigai')      }] },
+    { h: 'Read',    l: [{ label: 'Discover',       action: () => go('/explore')     }, { label: 'Featured poets', action: () => go('/explore')     }, { label: 'Trending',       action: () => go('/explore')     }, { label: 'Collections',    action: () => go('/collections') }] },
+    { h: 'Account', l: [{ label: 'Sign in',        action: () => setSignInOpen(true) }, { label: 'Settings',      action: () => go('/settings')    }, { label: 'Help',           action: () => {}                 }] },
+    { h: 'Muse',    l: [{ label: 'About',          action: () => {}                  }, { label: 'Manifesto',     action: () => {}                 }, { label: 'Careers',        action: () => {}                 }, { label: 'Press',          action: () => {}                 }] },
   ];
 
   return (
@@ -885,7 +906,7 @@ function LandingFooter({ night }: { night: boolean }) {
    MAIN EXPORT
 ══════════════════════════════════════════════════ */
 export default function HomeLanding() {
-  const { night, openPage, setSignInOpen } = useMuseStore();
+  const { night, setSignInOpen } = useMuseStore();
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -893,8 +914,8 @@ export default function HomeLanding() {
 
   useEffect(() => {
     const page = searchParams.get('page');
-    if (page && isLoaded && isSignedIn) { openPage(page); router.replace('/'); }
-  }, [isLoaded, isSignedIn, searchParams, openPage, router]);
+    if (page && isLoaded && isSignedIn) { router.replace('/' + page.replace(' ', '-')); }
+  }, [isLoaded, isSignedIn, searchParams, router]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);
@@ -905,7 +926,7 @@ export default function HomeLanding() {
 
   function handleBeginWriting() {
     if (!isLoaded) return;
-    if (isSignedIn) openPage('write');
+    if (isSignedIn) router.push('/write');
     else setSignInOpen(true);
   }
 
@@ -913,9 +934,6 @@ export default function HomeLanding() {
     <div style={{ overflowX: 'hidden', position: 'relative', minHeight: '100vh' }}>
       <MeshOrbsBg night={night} />
       <ParticlesBg night={night} />
-      <Drawer />
-      <AppOverlay />
-      <SignInModal />
       <GlassNav scrolled={scrolled} />
       <div style={{ position: 'relative', zIndex: 2 }}>
         <Hero night={night} onBeginWriting={handleBeginWriting} />

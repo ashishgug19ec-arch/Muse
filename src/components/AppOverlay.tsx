@@ -1,5 +1,6 @@
 'use client';
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { useMuseStore } from '@/lib/store';
 import { MuseLogo } from './ui/MuseLogo';
@@ -58,16 +59,17 @@ const PAGE_MAP: Record<string, React.ComponentType<{ night: boolean }>> = {
 };
 
 const NAV_LINKS = [
-  { label: 'Dashboard',   page: 'dashboard' },
-  { label: 'Poems',       page: 'poems' },
-  { label: 'Explore',     page: 'explore' },
-  { label: 'Fan Fiction', page: 'fan fiction' },
-  { label: 'Collections', page: 'collections' },
+  { label: 'Dashboard',   href: '/dashboard' },
+  { label: 'Poems',       href: '/poems' },
+  { label: 'Explore',     href: '/explore' },
+  { label: 'Fan Fiction', href: '/fan-fiction' },
+  { label: 'Collections', href: '/collections' },
 ];
 
 export function AppOverlay() {
-  const { activePage, closePage, night, toggleNight, openPage, setSignInOpen } = useMuseStore();
+  const { activePage, closePage, night, toggleNight, setSignInOpen } = useMuseStore();
   const { isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
   const pageKey = activePage?.toLowerCase() ?? '';
   const Page = pageKey ? PAGE_MAP[pageKey] : null;
 
@@ -86,9 +88,14 @@ export function AppOverlay() {
     : 'linear-gradient(160deg,rgba(248,244,255,.98) 0%,rgba(255,243,250,.97) 100%)';
 
   const borderCol = night ? 'rgba(160,124,200,.18)' : 'rgba(208,191,240,.4)';
-  const ink3 = night ? 'rgba(160,140,200,.55)' : '#8a7aa0';
-  const nameCol = night ? 'rgba(240,230,255,.9)' : '#1e1628';
-  const linkCol = night ? 'rgba(200,170,255,.7)' : '#8a7aa0';
+  const ink3    = night ? 'rgba(160,140,200,.55)' : '#8a7aa0';
+  const nameCol = night ? 'rgba(240,230,255,.9)'  : '#1e1628';
+  const linkCol = night ? 'rgba(200,170,255,.7)'  : '#8a7aa0';
+
+  function navTo(href: string) {
+    closePage();
+    router.push(href);
+  }
 
   return (
     <div style={{
@@ -120,7 +127,7 @@ export function AppOverlay() {
             flexShrink: 0,
           }} aria-label="Back">←</button>
 
-          <button onClick={() => openPage('dashboard')} style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+          <button onClick={() => navTo('/dashboard')} style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
             <MuseLogo size={30} />
             <div style={{ textAlign: 'left' }}>
               <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, color: nameCol, fontWeight: 400, letterSpacing: '-.01em', lineHeight: 1 }}>Muse</div>
@@ -137,22 +144,19 @@ export function AppOverlay() {
 
         {/* Center: quick nav links */}
         <nav style={{ display: 'flex', gap: 4 }}>
-          {NAV_LINKS.map(l => {
-            const isActive = pageKey === l.page || pageKey === l.label.toLowerCase();
-            return (
-              <button key={l.label} onClick={() => openPage(l.page)} style={{
-                padding: '6px 14px', borderRadius: 50, fontSize: 12,
-                background: isActive ? (night ? 'rgba(192,132,252,.15)' : 'rgba(192,132,252,.1)') : 'transparent',
-                border: isActive ? `1px solid rgba(192,132,252,.35)` : '1px solid transparent',
-                color: isActive ? '#c084fc' : linkCol,
-                cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", fontWeight: 300,
-                transition: 'all .15s',
-              }}
-                onMouseEnter={e => { if (!isActive) { e.currentTarget.style.color = '#c084fc'; e.currentTarget.style.background = night ? 'rgba(192,132,252,.08)' : 'rgba(192,132,252,.06)'; } }}
-                onMouseLeave={e => { if (!isActive) { e.currentTarget.style.color = linkCol; e.currentTarget.style.background = 'transparent'; } }}
-              >{l.label}</button>
-            );
-          })}
+          {NAV_LINKS.map(l => (
+            <button key={l.label} onClick={() => navTo(l.href)} style={{
+              padding: '6px 14px', borderRadius: 50, fontSize: 12,
+              background: 'transparent',
+              border: '1px solid transparent',
+              color: linkCol,
+              cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", fontWeight: 300,
+              transition: 'all .15s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#c084fc'; e.currentTarget.style.background = night ? 'rgba(192,132,252,.08)' : 'rgba(192,132,252,.06)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = linkCol; e.currentTarget.style.background = 'transparent'; }}
+            >{l.label}</button>
+          ))}
         </nav>
 
         {/* Right: night toggle + close */}

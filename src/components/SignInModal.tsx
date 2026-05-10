@@ -8,12 +8,16 @@ type Mode = 'signin' | 'signup';
 type SiStep = 'email' | 'otp' | 'password';
 type SuStep = 'info' | 'otp';
 
+function getClerk() { return (window as any).Clerk; }
+function getSignIn() { return getClerk()?.client?.signIn; }
+function getSignUp() { return getClerk()?.client?.signUp; }
+
 export function SignInModal() {
   const { signInOpen, setSignInOpen, night } = useMuseStore();
   const [mode, setMode] = useState<Mode>('signin');
 
-  const { isLoaded: siLoaded, signIn, setActive: siSetActive } = useSignIn() as any;
-  const { isLoaded: suLoaded, signUp, setActive: suSetActive } = useSignUp() as any;
+  const { isLoaded: siLoaded, signIn: hookSignIn, setActive: hookSiSetActive } = (useSignIn() ?? {}) as any;
+  const { isLoaded: suLoaded, signUp: hookSignUp, setActive: hookSuSetActive } = (useSignUp() ?? {}) as any;
 
   const [siStep, setSiStep] = useState<SiStep>('email');
   const [suStep, setSuStep] = useState<SuStep>('info');
@@ -25,6 +29,14 @@ export function SignInModal() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  function getSignInObj() { return siLoaded ? hookSignIn : getSignIn(); }
+  function getSignUpObj() { return suLoaded ? hookSignUp : getSignUp(); }
+  async function doSetActive(sessionId: string) {
+    if (hookSiSetActive) return hookSiSetActive({ session: sessionId });
+    if (hookSuSetActive) return hookSuSetActive({ session: sessionId });
+    await getClerk()?.setActive({ session: sessionId });
+  }
+
   function reset() {
     setEmail(''); setFirstName(''); setCode(''); setSuCode(''); setPassword('');
     setSiStep('email'); setSuStep('info'); setError(''); setLoading(false);
@@ -33,15 +45,17 @@ export function SignInModal() {
   function switchMode(m: Mode) { reset(); setMode(m); }
 
   async function handleSiEmail(e: React.FormEvent) {
-    e.preventDefault(); if (!siLoaded) return;
+    e.preventDefault();
+    const si = getSignInObj();
+    if (!si) { setError('Auth not ready, please refresh the page'); return; }
     setLoading(true); setError('');
     try {
-      const si = await signIn.create({ identifier: email });
-      const factors = si.supportedFirstFactors ?? [];
+      const res = await si.create({ identifier: email });
+      const factors = res.supportedFirstFactors ?? [];
       const codeF = factors.find((f: any) => f.strategy === 'email_code');
       const passF = factors.find((f: any) => f.strategy === 'password');
       if (codeF) {
-        await signIn.prepareFirstFactor({ strategy: 'email_code', emailAddressId: codeF.emailAddressId });
+        await si.prepareFirstFactor({ strategy: 'email_code', emailAddressId: codeF.emailAddressId });
         setSiStep('otp');
       } else if (passF) {
         setSiStep('password');
@@ -51,51 +65,68 @@ export function SignInModal() {
   }
 
   async function handleSiOtp(e: React.FormEvent) {
-    e.preventDefault(); if (!siLoaded) return;
+    e.preventDefault();
+    const si = getSignInObj();
+    if (!si) { setError('Auth not ready, please refresh the page'); return; }
     setLoading(true); setError('');
     try {
-      const r = await signIn.attemptFirstFactor({ strategy: 'email_code', code });
-      if (r.status === 'complete') { await siSetActive({ session: r.createdSessionId }); close(); }
+      const r = await si.attemptFirstFactor({ strategy: 'email_code', code });
+      if (r.status === 'complete') { await doSetActive(r.createdSessionId); close(); }
     } catch (err: any) { setError(err.errors?.[0]?.longMessage ?? 'Invalid code'); }
     finally { setLoading(false); }
   }
 
   async function handleSiPassword(e: React.FormEvent) {
-    e.preventDefault(); if (!siLoaded) return;
+    e.preventDefault();
+    const si = getSignInObj();
+    if (!si) { setError('Auth not ready, please refresh the page'); return; }
     setLoading(true); setError('');
     try {
-      const r = await signIn.attemptFirstFactor({ strategy: 'password', password });
-      if (r.status === 'complete') { await siSetActive({ session: r.createdSessionId }); close(); }
+      const r = await si.attemptFirstFactor({ strategy: 'password', password });
+      if (r.status === 'complete') { await doSetActive(r.createdSessionId); close(); }
     } catch (err: any) { setError(err.errors?.[0]?.longMessage ?? 'Incorrect password'); }
     finally { setLoading(false); }
   }
 
   async function handleSuInfo(e: React.FormEvent) {
-    e.preventDefault(); if (!suLoaded) return;
+    e.preventDefault();
+    const su = getSignUpObj();
+    if (!su) { setError('Auth not ready, please refresh the page'); return; }
     setLoading(true); setError('');
     try {
-      await signUp.create({ firstName, emailAddress: email });
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      await su.create({ firstName, emailAddress: email });
+      await su.prepareEmailAddressVerification({ strategy: 'email_code' });
       setSuStep('otp');
     } catch (err: any) { setError(err.errors?.[0]?.longMessage ?? 'Something went wrong'); }
     finally { setLoading(false); }
   }
 
   async function handleSuOtp(e: React.FormEvent) {
-    e.preventDefault(); if (!suLoaded) return;
+    e.preventDefault();
+    const su = getSignUpObj();
+    if (!su) { setError('Auth not ready, please refresh the page'); return; }
     setLoading(true); setError('');
     try {
-      const r = await signUp.attemptEmailAddressVerification({ code: suCode });
-      if (r.status === 'complete') { await suSetActive({ session: r.createdSessionId }); close(); }
+      const r = await su.attemptEmailAddressVerification({ code: suCode });
+      if (r.status === 'complete') { await doSetActive(r.createdSessionId); close(); }
     } catch (err: any) { setError(err.errors?.[0]?.longMessage ?? 'Invalid code'); }
     finally { setLoading(false); }
   }
 
   async function handleGoogle() {
-    if (mode === 'signin' && siLoaded)
-      await signIn.authenticateWithRedirect({ strategy: 'oauth_google', redirectUrl: '/sso-callback', redirectUrlComplete: '/' });
-    else if (mode === 'signup' && suLoaded)
-      await signUp.authenticateWithRedirect({ strategy: 'oauth_google', redirectUrl: '/sso-callback', redirectUrlComplete: '/' });
+    const origin = window.location.origin;
+    const si = getSignInObj();
+    const su = getSignUpObj();
+    try {
+      if (mode === 'signin' && si)
+        await si.authenticateWithRedirect({ strategy: 'oauth_google', redirectUrl: `${origin}/sso-callback`, redirectUrlComplete: `${origin}/` });
+      else if (mode === 'signup' && su)
+        await su.authenticateWithRedirect({ strategy: 'oauth_google', redirectUrl: `${origin}/sso-callback`, redirectUrlComplete: `${origin}/` });
+      else
+        setError('Auth not ready, please refresh the page');
+    } catch (err: any) {
+      setError(err.errors?.[0]?.longMessage ?? err.message ?? 'Google sign-in failed');
+    }
   }
 
   const leftBg = night
@@ -272,6 +303,8 @@ export function SignInModal() {
   );
 }
 
+const errSt: React.CSSProperties = { fontSize: 12.5, color: '#e05a7a', marginBottom: 10, fontFamily: "'DM Sans',sans-serif", lineHeight: 1.4 };
+
 function MField({ label, type = 'text', value, onChange, placeholder, night, autoFocus, center, large }: {
   label: string; type?: string; value: string; onChange: (v: string) => void;
   placeholder?: string; night?: boolean; autoFocus?: boolean; center?: boolean; large?: boolean;
@@ -280,7 +313,7 @@ function MField({ label, type = 'text', value, onChange, placeholder, night, aut
     <label style={{ display: 'block', marginBottom: 14 }}>
       <div style={{ fontFamily: "'Geist Mono',monospace", fontSize: 9.5, letterSpacing: '.22em', opacity: .55, marginBottom: 6, textTransform: 'uppercase', color: night ? '#f6eafd' : '#0c0612' }}>{label}</div>
       <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} autoFocus={autoFocus}
-        style={{ width: '100%', padding: '13px 16px', borderRadius: 12, background: night ? 'rgba(184,154,216,.08)' : 'rgba(122,58,138,.05)', border: `1px solid ${night ? 'rgba(184,154,216,.2)' : 'rgba(122,58,138,.14)'}`, fontSize: large ? 22 : 14, fontFamily: "'DM Sans',sans-serif", color: night ? '#f6eafd' : '#0c0612', outline: 'none', letterSpacing: center ? '.4em' : undefined, textAlign: center ? 'center' : undefined, transition: 'border-color .2s' }}
+        style={{ width: '100%', padding: '13px 16px', borderRadius: 12, background: night ? 'rgba(184,154,216,.08)' : 'rgba(122,58,138,.05)', border: `1px solid ${night ? 'rgba(184,154,216,.2)' : 'rgba(122,58,138,.14)'}`, fontSize: large ? 22 : 14, fontFamily: "'DM Sans',sans-serif", color: night ? '#f6eafd' : '#0c0612', outline: 'none', letterSpacing: center ? '.4em' : undefined, textAlign: center ? 'center' : undefined, transition: 'border-color .2s', boxSizing: 'border-box' }}
         onFocus={e => e.target.style.borderColor = night ? 'rgba(232,154,184,.6)' : 'rgba(122,58,138,.5)'}
         onBlur={e => e.target.style.borderColor = night ? 'rgba(184,154,216,.2)' : 'rgba(122,58,138,.14)'}
       />
@@ -323,13 +356,11 @@ function GhostBtn({ label, onClick, night }: { label: string; onClick: () => voi
 
 function GoogleIcon() {
   return (
-    <svg width="17" height="17" viewBox="0 0 18 18" style={{ flexShrink: 0 }}>
-      <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z" />
-      <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z" />
-      <path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z" />
-      <path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z" />
+    <svg width="18" height="18" viewBox="0 0 18 18">
+      <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+      <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
+      <path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/>
+      <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
     </svg>
   );
 }
-
-const errSt: React.CSSProperties = { fontSize: 12, color: '#c0406a', margin: '-6px 0 10px', lineHeight: 1.5, fontFamily: "'DM Sans',sans-serif" };

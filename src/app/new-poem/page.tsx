@@ -1,13 +1,13 @@
 'use client';
 import { AppShell } from '@/components/AppShell';
-import { PageDashboard } from '@/components/pages/PageDashboard';
+import { PageNewPoem } from '@/components/pages/PageNewPoem';
 import { useMuseStore } from '@/lib/store';
 
-export default function DashboardPage() {
+export default function NewPoemPage() {
   const { night } = useMuseStore();
   return (
-    <AppShell title="dashboard">
-      <PageDashboard night={night} />
+    <AppShell title="new poem">
+      <PageNewPoem night={night} />
     </AppShell>
   );
 }

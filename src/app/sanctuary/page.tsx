@@ -1,13 +1,13 @@
 'use client';
 import { AppShell } from '@/components/AppShell';
-import { PageDashboard } from '@/components/pages/PageDashboard';
+import { PageSanctuary } from '@/components/pages/PageSanctuary';
 import { useMuseStore } from '@/lib/store';
 
-export default function DashboardPage() {
+export default function SanctuaryPage() {
   const { night } = useMuseStore();
   return (
-    <AppShell title="dashboard">
-      <PageDashboard night={night} />
+    <AppShell title="sanctuary">
+      <PageSanctuary night={night} />
     </AppShell>
   );
 }

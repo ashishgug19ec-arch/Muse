@@ -6,26 +6,26 @@ import { useMuseStore } from '@/lib/store';
 
 const GROUPS = [
   { h: 'WRITE', auth: true, items: [
-    { label: 'Sanctuary',       ic: '✎', page: 'sanctuary'     },
-    { label: 'New poem',        ic: '+', page: 'new poem'       },
-    { label: 'Fan fiction',     ic: '✦', page: 'fan fiction'   },
-    { label: 'Ikigai journal',  ic: '◉', page: 'ikigai'        },
+    { label: 'Begin writing',   ic: '✎', page: 'write'          },
   ]},
   { h: 'READ', auth: false, items: [
-    { label: 'Discover',        ic: '✣', page: 'explore',       auth: false },
-    { label: 'Featured poets',  ic: '★', page: 'explore',       auth: false },
-    { label: 'Trending',        ic: '↗', page: 'explore',       auth: false },
-    { label: 'Collections',     ic: '▥', page: 'collections',   auth: true  },
+    { label: 'Dashboard',       ic: '⊞', page: 'dashboard',      auth: true  },
+    { label: 'Discover',        ic: '✣', page: 'explore',        auth: false },
+    { label: 'Poems',           ic: '◦', page: 'poems',          auth: true  },
+    { label: 'Fan fiction',     ic: '✦', page: 'fan fiction',    auth: true  },
+    { label: 'Ikigai journal',  ic: '◉', page: 'ikigai',         auth: true  },
+    { label: 'Scraps',          ic: '✂', page: 'scraps',         auth: true  },
+    { label: 'Collections',     ic: '▥', page: 'collections',    auth: true  },
   ]},
   { h: 'ACCOUNT', auth: true, items: [
-    { label: 'My profile',      ic: '→', page: 'profile'        },
-    { label: 'Notifications',   ic: '◷', page: 'notifications'  },
-    { label: 'Settings',        ic: '⚙', page: 'settings'       },
+    { label: 'My profile',      ic: '→', page: 'profile'         },
+    { label: 'Notifications',   ic: '◷', page: 'notifications'   },
+    { label: 'Settings',        ic: '⚙', page: 'settings'        },
   ]},
 ];
 
 export function Drawer() {
-  const { drawerOpen, night, setDrawerOpen, openPage } = useMuseStore();
+  const { drawerOpen, night, setDrawerOpen, setSignInOpen } = useMuseStore();
   const { isSignedIn, isLoaded, user } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
@@ -41,9 +41,24 @@ export function Drawer() {
     ? `${user.firstName}${user.lastName ? ' ' + user.lastName : ''}`
     : user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ?? 'poet';
 
+  const PAGE_ROUTES: Record<string, string> = {
+    write: '/write',
+    'fan fiction': '/fan-fiction',
+    ikigai: '/ikigai',
+    scraps: '/scraps',
+    explore: '/explore',
+    poems: '/poems',
+    collections: '/collections',
+    profile: '/profile',
+    notifications: '/notifications',
+    settings: '/settings',
+    dashboard: '/dashboard',
+  };
+
   function handleNav(page: string) {
     setDrawerOpen(false);
-    openPage(page);
+    const route = PAGE_ROUTES[page];
+    if (route) router.push(route);
   }
 
   const visibleGroups = isLoaded && isSignedIn ? GROUPS : [];
@@ -119,7 +134,7 @@ export function Drawer() {
             {/* Sign-in prompt for guests */}
             {isLoaded && !isSignedIn && (
               <div style={{ display: 'flex', gap: 10 }}>
-                <button onClick={() => { setDrawerOpen(false); router.push('/sign-in'); }}
+                <button onClick={() => { setDrawerOpen(false); setSignInOpen(true); }}
                   style={{ flex: 1, padding: '11px', borderRadius: 50, border: `1px solid ${bd}`, background: 'transparent', color: ink, fontSize: 12, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>
                   Sign in
                 </button>
@@ -175,10 +190,12 @@ export function Drawer() {
                 </button>
               )}
 
-              <button onClick={() => { setDrawerOpen(false); isSignedIn ? openPage('write') : router.push('/sign-up'); }}
-                style={{ padding: '14px 24px', borderRadius: 50, border: 'none', background: n ? '#f6eafd' : '#0c0612', color: n ? '#0c0612' : '#f7f3ff', fontSize: 13, fontWeight: 500, cursor: 'pointer', letterSpacing: '.04em', fontFamily: "'DM Sans',sans-serif", boxShadow: '0 8px 28px rgba(12,6,18,.2)' }}>
-                {isSignedIn ? 'Begin writing →' : 'Plant your first poem →'}
-              </button>
+              {!isSignedIn && (
+                <button onClick={() => { setDrawerOpen(false); router.push('/sign-up'); }}
+                  style={{ padding: '14px 24px', borderRadius: 50, border: 'none', background: n ? '#f6eafd' : '#0c0612', color: n ? '#0c0612' : '#f7f3ff', fontSize: 13, fontWeight: 500, cursor: 'pointer', letterSpacing: '.04em', fontFamily: "'DM Sans',sans-serif", boxShadow: '0 8px 28px rgba(12,6,18,.2)' }}>
+                  Plant your first poem →
+                </button>
+              )}
             </div>
 
           </motion.aside>

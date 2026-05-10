@@ -1,13 +1,13 @@
 'use client';
 import { AppShell } from '@/components/AppShell';
-import { PageDashboard } from '@/components/pages/PageDashboard';
+import { PageIkigai } from '@/components/pages/PageIkigai';
 import { useMuseStore } from '@/lib/store';
 
-export default function DashboardPage() {
+export default function IkigaiPage() {
   const { night } = useMuseStore();
   return (
-    <AppShell title="dashboard">
-      <PageDashboard night={night} />
+    <AppShell title="ikigai journal">
+      <PageIkigai night={night} />
     </AppShell>
   );
 }
