@@ -14,10 +14,10 @@ interface ImageUploadProps {
 }
 
 const SIZE_LABELS: Record<Endpoint, string> = {
-  avatar: "2 MB max",
-  poemCover: "4 MB max",
-  fanficCover: "4 MB max",
-  banner: "8 MB max",
+  avatar: "1 MB max",
+  poemCover: "1 MB max",
+  fanficCover: "1 MB max",
+  banner: "1 MB max",
 };
 
 export default function ImageUpload({

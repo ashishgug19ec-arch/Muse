@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 const f = createUploadthing();
 
 export const ourFileRouter = {
-  poemCover: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
+  poemCover: f({ image: { maxFileSize: "1MB", maxFileCount: 1 } })
     .middleware(async () => {
       const { userId } = await auth();
       if (!userId) throw new Error("Unauthorized");
@@ -14,7 +14,7 @@ export const ourFileRouter = {
       return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),
 
-  fanficCover: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
+  fanficCover: f({ image: { maxFileSize: "1MB", maxFileCount: 1 } })
     .middleware(async () => {
       const { userId } = await auth();
       if (!userId) throw new Error("Unauthorized");
@@ -24,7 +24,7 @@ export const ourFileRouter = {
       return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),
 
-  avatar: f({ image: { maxFileSize: "2MB", maxFileCount: 1 } })
+  avatar: f({ image: { maxFileSize: "1MB", maxFileCount: 1 } })
     .middleware(async () => {
       const { userId } = await auth();
       if (!userId) throw new Error("Unauthorized");
@@ -34,7 +34,7 @@ export const ourFileRouter = {
       return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),
 
-  banner: f({ image: { maxFileSize: "8MB", maxFileCount: 1 } })
+  banner: f({ image: { maxFileSize: "1MB", maxFileCount: 1 } })
     .middleware(async () => {
       const { userId } = await auth();
       if (!userId) throw new Error("Unauthorized");
