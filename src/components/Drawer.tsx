@@ -26,7 +26,7 @@ const GROUPS = [
 ];
 
 export function Drawer() {
-  const { drawerOpen, night, setDrawerOpen, setSignInOpen, nickname, setNickname } = useMuseStore();
+  const { drawerOpen, night, setDrawerOpen, setSignInOpen, nickname, setNickname, avatarUrl, setAvatarUrl } = useMuseStore();
   const { isSignedIn, isLoaded, user } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
@@ -36,9 +36,12 @@ export function Drawer() {
     if (!isLoaded || !isSignedIn || nickname !== null) return;
     fetch('/api/profile/me')
       .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.username) setNickname(data.username); })
+      .then(data => {
+        if (data?.username) setNickname(data.username);
+        if (data?.avatarUrl) setAvatarUrl(data.avatarUrl);
+      })
       .catch(() => {});
-  }, [isLoaded, isSignedIn, nickname, setNickname]);
+  }, [isLoaded, isSignedIn, nickname, setNickname, setAvatarUrl]);
 
   const ink     = n ? '#f6eafd'                    : '#0c0612';
   const mono    = n ? '#b89ad8'                    : '#7a3a8a';
@@ -125,6 +128,23 @@ export function Drawer() {
                 ✕
               </button>
             </div>
+
+            {/* Avatar */}
+            {isLoaded && isSignedIn && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: 'linear-gradient(135deg,#c084fc,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#fff', fontWeight: 600, border: `2px solid ${bd}` }}>
+                  {avatarUrl
+                    ? <img src={avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                    : displayName[0]?.toUpperCase()
+                  }
+                </div>
+                {user?.emailAddresses?.[0]?.emailAddress && (
+                  <div style={{ fontSize: 11, color: ink3, fontFamily: "'DM Sans',sans-serif", overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {user.emailAddresses[0].emailAddress}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Welcome heading */}
             <div className="serif" style={{ fontSize: 32, fontWeight: 300, letterSpacing: '-.025em', lineHeight: 1.1, fontStyle: 'italic', color: ink }}>

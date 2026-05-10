@@ -17,6 +17,8 @@ interface Profile {
   pronouns: string | null;
   location: string | null;
   whyYouWrite: string | null;
+  avatarUrl: string | null;
+  bannerUrl: string | null;
 }
 
 function fmt(n: number) {
@@ -89,16 +91,22 @@ export function PageAuthorProfile({ night }: Props) {
 
         {/* Profile hero */}
         <motion.div variants={fadeUp} style={{ borderRadius: 24, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', overflow: 'hidden' }}>
-          {/* Cover */}
-          <div style={{ height: 80, background: n ? 'linear-gradient(135deg,rgba(124,58,237,.25),rgba(208,100,136,.15))' : 'linear-gradient(135deg,rgba(238,230,255,.9),rgba(252,228,240,.85))', position: 'relative' }}>
-            <div style={{ position: 'absolute', top: -20, right: 40, width: 120, height: 120, borderRadius: '50%', background: 'radial-gradient(circle,rgba(192,132,252,.2),transparent 70%)', pointerEvents: 'none' }} />
+          {/* Banner */}
+          <div style={{ height: 110, position: 'relative', overflow: 'hidden', background: profile?.bannerUrl ? 'transparent' : (n ? 'linear-gradient(135deg,rgba(124,58,237,.25),rgba(208,100,136,.15))' : 'linear-gradient(135deg,rgba(238,230,255,.9),rgba(252,228,240,.85))') }}>
+            {profile?.bannerUrl
+              ? <img src={profile.bannerUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+              : <div style={{ position: 'absolute', top: -20, right: 40, width: 120, height: 120, borderRadius: '50%', background: 'radial-gradient(circle,rgba(192,132,252,.2),transparent 70%)', pointerEvents: 'none' }} />
+            }
           </div>
 
           {/* Identity */}
           <div style={{ padding: '0 24px 24px', marginTop: -36, position: 'relative' }}>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16, marginBottom: 16 }}>
-              <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg,#c084fc,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, color: '#fff', fontWeight: 600, flexShrink: 0, boxShadow: '0 4px 20px rgba(124,58,237,.35)', border: `3px solid ${n ? '#0f0620' : '#fff'}` }}>
-                {initials}
+              <div style={{ width: 72, height: 72, borderRadius: '50%', overflow: 'hidden', background: 'linear-gradient(135deg,#c084fc,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, color: '#fff', fontWeight: 600, flexShrink: 0, boxShadow: '0 4px 20px rgba(124,58,237,.35)', border: `3px solid ${n ? '#0f0620' : '#fff'}` }}>
+                {profile?.avatarUrl
+                  ? <img src={profile.avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                  : initials
+                }
               </div>
               <div style={{ paddingBottom: 4 }}>
                 <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 400, color: ink, lineHeight: 1.2 }}>{displayName}</div>

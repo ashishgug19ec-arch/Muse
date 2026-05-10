@@ -10,7 +10,7 @@ type Tab = 'poems' | 'fanfics';
 interface ExplorePoem {
   poem: {
     id: string; title: string; body: string; type: string | null; mood: string | null;
-    readCount: number | null; likeCount: number | null; createdAt: string;
+    readCount: number | null; likeCount: number | null; createdAt: string; coverImageUrl: string | null;
   };
   author: { displayName: string | null; username: string | null; avatarUrl: string | null };
 }
@@ -18,7 +18,7 @@ interface ExplorePoem {
 interface ExploreFanfic {
   fanfic: {
     id: string; title: string; blurb: string | null; fandom: string | null; status: string;
-    chapterCount: number | null; readCount: number | null; createdAt: string;
+    chapterCount: number | null; readCount: number | null; createdAt: string; coverImageUrl: string | null;
   };
   author: { displayName: string | null; username: string | null; avatarUrl: string | null };
 }
@@ -252,8 +252,12 @@ export function PageExplore({ night }: Props) {
                             <Tilt style={{
                               borderRadius: 22, border: `1.5px solid ${g.bd}`,
                               background: g.bg, backdropFilter: 'blur(20px)',
-                              padding: '24px', cursor: 'pointer', position: 'relative', overflow: 'hidden',
+                              cursor: 'pointer', position: 'relative', overflow: 'hidden',
                             }}>
+                              {item.poem.coverImageUrl && (
+                                <div style={{ width: '100%', aspectRatio: '16/9', background: `url(${item.poem.coverImageUrl}) center/cover no-repeat` }} />
+                              )}
+                              <div style={{ padding: '24px', position: 'relative' }}>
                               <div style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, background: `radial-gradient(circle,${g.color}25,transparent 70%)`, pointerEvents: 'none', borderRadius: '50%' }} />
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
                                 <span style={{ fontSize: 10, padding: '3px 12px', borderRadius: 50, background: g.bg, color: g.color, border: `1px solid ${g.bd}`, letterSpacing: '.08em' }}>
@@ -269,6 +273,7 @@ export function PageExplore({ night }: Props) {
                               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <div style={{ width: 24, height: 24, borderRadius: '50%', background: g.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 600 }}>{author[0].toUpperCase()}</div>
                                 <span style={{ fontSize: 11, color: ink3 }}>by {author}</span>
+                              </div>
                               </div>
                             </Tilt>
                           </motion.div>
@@ -356,8 +361,12 @@ export function PageExplore({ night }: Props) {
                     return (
                       <motion.div key={item.fanfic.id} variants={fadeUp}
                         whileHover={{ y: -4, scale: 1.008 }}
-                        style={{ borderRadius: 22, border: `1.5px solid ${cardBd}`, background: night ? cardBg : g.bg, backdropFilter: 'blur(20px)', padding: '24px 26px', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}
+                        style={{ borderRadius: 22, border: `1.5px solid ${cardBd}`, background: night ? cardBg : g.bg, backdropFilter: 'blur(20px)', cursor: 'pointer', position: 'relative', overflow: 'hidden', display: 'flex' }}
                       >
+                        {item.fanfic.coverImageUrl && (
+                          <div style={{ width: 90, flexShrink: 0, background: `url(${item.fanfic.coverImageUrl}) center/cover no-repeat`, borderRadius: '22px 0 0 22px' }} />
+                        )}
+                        <div style={{ flex: 1, padding: '24px 26px', position: 'relative', minWidth: 0 }}>
                         <div style={{ position: 'absolute', top: -24, right: -24, width: 80, height: 80, background: `radial-gradient(circle,${g.color}20,transparent 70%)`, borderRadius: '50%', pointerEvents: 'none' }} />
                         <div style={{ display: 'flex', gap: 7, alignItems: 'center', marginBottom: 12 }}>
                           {item.fanfic.fandom && (
@@ -384,6 +393,7 @@ export function PageExplore({ night }: Props) {
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             {(item.fanfic.readCount ?? 0).toLocaleString()} reads
                           </span>
+                        </div>
                         </div>
                       </motion.div>
                     );

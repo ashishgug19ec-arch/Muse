@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@clerk/nextjs';
 import { useMuseStore } from '@/lib/store';
 import { useUploadThing } from '@/lib/uploadthing';
+import ImageUpload from '@/components/ImageUpload';
 
 interface Props { night: boolean; }
 
@@ -15,7 +16,7 @@ const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 
 export function PageSettings({ night }: Props) {
   const { user, isLoaded } = useUser();
-  const { setNickname } = useMuseStore();
+  const { setNickname, setAvatarUrl: setStoreAvatarUrl } = useMuseStore();
   const [username, setUsername]     = useState('');
   const [bio, setBio]               = useState('');
   const [pronouns, setPronouns]     = useState('');
@@ -25,6 +26,7 @@ export function PageSettings({ night }: Props) {
   const [avatarHover, setAvatarHover] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [bannerUrl, setBannerUrl]   = useState('');
   const [saving, setSaving]         = useState(false);
   const [saved, setSaved]           = useState(false);
   const [loaded, setLoaded]         = useState(false);
@@ -32,9 +34,10 @@ export function PageSettings({ night }: Props) {
 
   const { startUpload: startAvatarUpload } = useUploadThing('avatar', {
     onClientUploadComplete: (res) => {
-      const url = res?.[0]?.ufsUrl;
+      const url = res?.[0]?.ufsUrl ?? (res?.[0] as any)?.url;
       if (url) {
         setAvatarUrl(url);
+        setStoreAvatarUrl(url);
         fetch('/api/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ avatarUrl: url }) }).catch(() => {});
       }
       setAvatarUploading(false);
@@ -71,6 +74,7 @@ export function PageSettings({ night }: Props) {
           setLocation(data.location ?? '');
           setWhyYouWrite(data.whyYouWrite ?? '');
           setAvatarUrl(data.avatarUrl ?? '');
+          setBannerUrl(data.bannerUrl ?? '');
         }
         setLoaded(true);
       })
@@ -153,6 +157,24 @@ export function PageSettings({ night }: Props) {
             </div>
             <div style={{ marginLeft: 'auto', fontSize: 10, padding: '3px 12px', borderRadius: 50, background: 'rgba(192,132,252,.12)', color: '#c084fc', border: '1px solid rgba(192,132,252,.3)', letterSpacing: '.06em' }}>Poet</div>
           </div>
+        </motion.div>
+
+        {/* Profile banner */}
+        <motion.div variants={fadeUp} style={{ borderRadius: 22, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            <div style={{ width: 16, height: 1, background: 'linear-gradient(90deg,#90c8a8,transparent)' }} />
+            <span style={{ fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', color: ink3 }}>Profile Banner</span>
+          </div>
+          <ImageUpload
+            endpoint="banner"
+            value={bannerUrl}
+            onChange={url => {
+              setBannerUrl(url);
+              fetch('/api/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bannerUrl: url || null }) }).catch(() => {});
+            }}
+            aspectRatio="wide"
+            label="Add profile banner"
+          />
         </motion.div>
 
         {/* Bio & details */}

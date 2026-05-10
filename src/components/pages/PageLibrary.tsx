@@ -12,6 +12,7 @@ interface Poem {
   type: string | null;
   mood: string | null;
   collectionId: string | null;
+  coverImageUrl: string | null;
   createdAt: string;
 }
 
@@ -261,12 +262,15 @@ export function PageLibrary({ night }: Props) {
                 style={{
                   borderRadius: 20, border: `1.5px solid ${cardBd}`,
                   background: cardBg, backdropFilter: 'blur(20px)',
-                  padding: '22px 22px', cursor: 'pointer',
-                  position: 'relative', overflow: 'hidden',
+                  cursor: 'pointer', overflow: 'hidden',
                   boxShadow: '0 4px 20px rgba(124,58,237,.06)',
                   transition: 'box-shadow .3s',
                 }}
               >
+                {p.coverImageUrl && (
+                  <div style={{ width: '100%', aspectRatio: '16/9', background: `url(${p.coverImageUrl}) center/cover no-repeat` }} />
+                )}
+                <div style={{ padding: '22px 22px', position: 'relative' }}>
                 {ms && <div style={{ position: 'absolute', top: 0, right: 0, width: 80, height: 80, background: `radial-gradient(circle,${ms.text}18,transparent 70%)`, pointerEvents: 'none' }} />}
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
                   {ms && <span style={{ fontSize: 9, padding: '2px 10px', borderRadius: 50, background: ms.bg, color: ms.text, border: `1px solid ${ms.border}`, letterSpacing: '.08em' }}>{p.mood}</span>}
@@ -276,6 +280,7 @@ export function PageLibrary({ night }: Props) {
                 <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 12, fontStyle: 'italic', color: ink3, lineHeight: 1.7, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{firstLine(p.body)}</div>
                 <div style={{ marginTop: 14, fontSize: 10, color: ink3, fontWeight: 300 }}>
                   {new Date(p.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+                </div>
                 </div>
               </motion.div>
             );
@@ -296,6 +301,9 @@ export function PageLibrary({ night }: Props) {
                 whileHover={{ backgroundColor: night ? 'rgba(160,124,200,.07)' : 'rgba(208,191,240,.16)' }}
               >
                 <div style={{ width: 5, height: 36, borderRadius: 4, background: ms ? ms.grad ?? 'linear-gradient(180deg,#c084fc,#7c3aed)' : 'linear-gradient(180deg,#c084fc,#7c3aed)', opacity: .5, flexShrink: 0 }} />
+                {p.coverImageUrl && (
+                  <div style={{ width: 44, height: 44, borderRadius: 10, flexShrink: 0, background: `url(${p.coverImageUrl}) center/cover no-repeat`, border: `1px solid ${cardBd}` }} />
+                )}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 400, color: ink, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</div>
                   <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 12, fontStyle: 'italic', color: ink3, fontWeight: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{firstLine(p.body)}</div>

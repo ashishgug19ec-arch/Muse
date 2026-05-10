@@ -8,6 +8,7 @@ interface MuseStore {
   sanctuaryDraft: { body: string } | null;
   signInOpen: boolean;
   nickname: string | null;
+  avatarUrl: string | null;
   toggleNight: () => void;
   setDrawerOpen: (v: boolean) => void;
   openPage: (page: string) => void;
@@ -16,6 +17,7 @@ interface MuseStore {
   clearDraft: () => void;
   setSignInOpen: (v: boolean) => void;
   setNickname: (v: string | null) => void;
+  setAvatarUrl: (v: string | null) => void;
 }
 
 export const useMuseStore = create<MuseStore>((set) => ({
@@ -25,6 +27,7 @@ export const useMuseStore = create<MuseStore>((set) => ({
   sanctuaryDraft: null,
   signInOpen: false,
   nickname: null,
+  avatarUrl: null,
   toggleNight: () => set((s) => ({ night: !s.night })),
   setDrawerOpen: (v) => set({ drawerOpen: v }),
   openPage: (page) => set({ activePage: page, drawerOpen: false }),
@@ -33,4 +36,5 @@ export const useMuseStore = create<MuseStore>((set) => ({
   clearDraft: () => set({ sanctuaryDraft: null }),
   setSignInOpen: (v) => set({ signInOpen: v }),
   setNickname: (v) => set({ nickname: v }),
+  setAvatarUrl: (v) => set({ avatarUrl: v }),
 }));
