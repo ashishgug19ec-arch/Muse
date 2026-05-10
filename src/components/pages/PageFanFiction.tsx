@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WriteToolbar } from '@/components/ui/WriteToolbar';
+import ImageUpload from '@/components/ImageUpload';
 
 interface Props { night: boolean; defaultView?: View; }
 
@@ -10,6 +11,7 @@ interface Fanfic {
   title: string;
   blurb: string | null;
   fandom: string | null;
+  coverImageUrl: string | null;
   status: string;
   chapterCount: number | null;
   createdAt: string;
@@ -54,6 +56,7 @@ export function PageFanFiction({ night, defaultView }: Props) {
   const [ficFandom, setFicFandom] = useState('');
   const [ficBlurb, setFicBlurb] = useState('');
   const [ficStatus, setFicStatus] = useState('ongoing');
+  const [ficCoverUrl, setFicCoverUrl] = useState('');
   const [chapTitle, setChapTitle] = useState('');
   const chapBodyRef = useRef('');
   const chapEditorRef = useRef<HTMLDivElement>(null);
@@ -102,8 +105,8 @@ export function PageFanFiction({ night, defaultView }: Props) {
     if (!ficTitle.trim()) return;
     setSaving(true);
     try {
-      const res = await fetch('/api/fanfics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: ficTitle.trim(), blurb: ficBlurb.trim() || null, fandom: ficFandom.trim() || null, status: ficStatus, visibility: 'public' }) });
-      if (res.ok) { const f = await res.json(); setFics(prev => [f, ...prev]); setFicTitle(''); setFicFandom(''); setFicBlurb(''); setFicStatus('ongoing'); setView('list'); }
+      const res = await fetch('/api/fanfics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: ficTitle.trim(), blurb: ficBlurb.trim() || null, fandom: ficFandom.trim() || null, status: ficStatus, visibility: 'public', coverImageUrl: ficCoverUrl || null }) });
+      if (res.ok) { const f = await res.json(); setFics(prev => [f, ...prev]); setFicTitle(''); setFicFandom(''); setFicBlurb(''); setFicStatus('ongoing'); setFicCoverUrl(''); setView('list'); }
     } finally { setSaving(false); }
   }
 
@@ -111,7 +114,7 @@ export function PageFanFiction({ night, defaultView }: Props) {
     if (!fic) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/fanfics/${fic.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: ficTitle, blurb: ficBlurb || null, fandom: ficFandom || null, status: ficStatus }) });
+      const res = await fetch(`/api/fanfics/${fic.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: ficTitle, blurb: ficBlurb || null, fandom: ficFandom || null, status: ficStatus, coverImageUrl: ficCoverUrl || null }) });
       if (res.ok) { const updated = await res.json(); setFics(prev => prev.map(x => x.id === updated.id ? updated : x)); setFic(updated); setView('reader'); }
     } finally { setSaving(false); }
   }
@@ -148,7 +151,7 @@ export function PageFanFiction({ night, defaultView }: Props) {
     } finally { setSaving(false); }
   }
 
-  function startEditFic() { if (!fic) return; setFicTitle(fic.title); setFicFandom(fic.fandom ?? ''); setFicBlurb(fic.blurb ?? ''); setFicStatus(fic.status); setView('edit-fic'); }
+  function startEditFic() { if (!fic) return; setFicTitle(fic.title); setFicFandom(fic.fandom ?? ''); setFicBlurb(fic.blurb ?? ''); setFicStatus(fic.status); setFicCoverUrl(fic.coverImageUrl ?? ''); setView('edit-fic'); }
   function startEditChap() { const ch = chaps.find(c => c.chapterNumber === activeChap); if (!ch) return; setChapTitle(ch.title); chapBodyRef.current = ch.body; setView('edit-chapter'); }
   function startAddChap() { setChapTitle(''); chapBodyRef.current = ''; setView('add-chapter'); }
 
@@ -171,7 +174,7 @@ export function PageFanFiction({ night, defaultView }: Props) {
         </div>
         <motion.button
           whileHover={{ scale: 1.03, y: -1 }} whileTap={{ scale: .98 }}
-          onClick={() => { setFicTitle(''); setFicFandom(''); setFicBlurb(''); setFicStatus('ongoing'); setView('create-fic'); }}
+          onClick={() => { setFicTitle(''); setFicFandom(''); setFicBlurb(''); setFicStatus('ongoing'); setFicCoverUrl(''); setView('create-fic'); }}
           style={{ padding: '10px 22px', borderRadius: 50, border: 'none', background: 'linear-gradient(135deg,#f472b6,#c084fc)', color: '#fff', fontSize: 12, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", boxShadow: '0 4px 18px rgba(244,114,182,.3)', display: 'flex', alignItems: 'center', gap: 6 }}
         >
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -247,15 +250,24 @@ export function PageFanFiction({ night, defaultView }: Props) {
           </h2>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            {[
-              { label: 'Title *', val: ficTitle, set: setFicTitle, placeholder: 'Story title…', type: 'input' },
-              { label: 'Fandom / Universe', val: ficFandom, set: setFicFandom, placeholder: 'e.g. Studio Ghibli, Original…', type: 'input' },
-            ].map(f2 => (
-              <div key={f2.label}>
-                <label style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, display: 'block', marginBottom: 8 }}>{f2.label}</label>
-                <input value={f2.val} onChange={e => f2.set(e.target.value)} placeholder={f2.placeholder} style={inputStyle} />
+
+            <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
+              <div style={{ width: 140, flexShrink: 0 }}>
+                <label style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, display: 'block', marginBottom: 8 }}>Cover image</label>
+                <ImageUpload endpoint="fanficCover" value={ficCoverUrl} onChange={setFicCoverUrl} aspectRatio="portrait" label="Add cover" />
               </div>
-            ))}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {[
+                  { label: 'Title *', val: ficTitle, set: setFicTitle, placeholder: 'Story title…' },
+                  { label: 'Fandom / Universe', val: ficFandom, set: setFicFandom, placeholder: 'e.g. Studio Ghibli, Original…' },
+                ].map(f2 => (
+                  <div key={f2.label}>
+                    <label style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, display: 'block', marginBottom: 8 }}>{f2.label}</label>
+                    <input value={f2.val} onChange={e => f2.set(e.target.value)} placeholder={f2.placeholder} style={inputStyle} />
+                  </div>
+                ))}
+              </div>
+            </div>
 
             <div>
               <label style={{ fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: ink3, display: 'block', marginBottom: 8 }}>Summary</label>

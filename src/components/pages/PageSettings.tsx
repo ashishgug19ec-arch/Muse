@@ -1,8 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@clerk/nextjs';
 import { useMuseStore } from '@/lib/store';
+import { useUploadThing } from '@/lib/uploadthing';
 
 interface Props { night: boolean; }
 
@@ -20,10 +21,26 @@ export function PageSettings({ night }: Props) {
   const [pronouns, setPronouns]     = useState('');
   const [location, setLocation]     = useState('');
   const [whyYouWrite, setWhyYouWrite] = useState('');
+  const [avatarUrl, setAvatarUrl]   = useState('');
+  const [avatarHover, setAvatarHover] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving]         = useState(false);
   const [saved, setSaved]           = useState(false);
   const [loaded, setLoaded]         = useState(false);
   const [usernameError, setUsernameError] = useState('');
+
+  const { startUpload: startAvatarUpload } = useUploadThing('avatar', {
+    onClientUploadComplete: (res) => {
+      const url = res?.[0]?.ufsUrl;
+      if (url) {
+        setAvatarUrl(url);
+        fetch('/api/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ avatarUrl: url }) }).catch(() => {});
+      }
+      setAvatarUploading(false);
+    },
+    onUploadError: () => setAvatarUploading(false),
+  });
 
   const n = night;
   const ink  = n ? 'rgba(230,220,255,.9)'  : '#1e1628';
@@ -53,6 +70,7 @@ export function PageSettings({ night }: Props) {
           setPronouns(data.pronouns ?? '');
           setLocation(data.location ?? '');
           setWhyYouWrite(data.whyYouWrite ?? '');
+          setAvatarUrl(data.avatarUrl ?? '');
         }
         setLoaded(true);
       })
@@ -109,9 +127,25 @@ export function PageSettings({ night }: Props) {
 
         {/* Account identity (read-only from Clerk) */}
         <motion.div variants={fadeUp} style={{ borderRadius: 22, border: `1.5px solid ${cardBd}`, background: cardBg, backdropFilter: 'blur(20px)', padding: '22px 24px' }}>
+          <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'linear-gradient(135deg,#c084fc,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: '#fff', fontWeight: 600, flexShrink: 0, boxShadow: '0 4px 16px rgba(124,58,237,.3)' }}>
-              {initials}
+            <div
+              onClick={() => avatarInputRef.current?.click()}
+              onMouseEnter={() => setAvatarHover(true)}
+              onMouseLeave={() => setAvatarHover(false)}
+              style={{ width: 60, height: 60, borderRadius: '50%', overflow: 'hidden', background: avatarUrl ? 'transparent' : 'linear-gradient(135deg,#c084fc,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: '#fff', fontWeight: 600, flexShrink: 0, boxShadow: '0 4px 16px rgba(124,58,237,.3)', cursor: 'pointer', position: 'relative' }}
+            >
+              {avatarUrl
+                ? <img src={avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                : initials
+              }
+              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: avatarHover || avatarUploading ? 1 : 0, transition: 'opacity .2s', pointerEvents: 'none' }}>
+                {avatarUploading
+                  ? <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                  : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                }
+              </div>
+              <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={async (e) => { const file = e.target.files?.[0]; if (!file) return; setAvatarUploading(true); await startAvatarUpload([file]); e.target.value = ''; }} />
             </div>
             <div>
               <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 18, color: ink, fontWeight: 400 }}>{displayName}</div>

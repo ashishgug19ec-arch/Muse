@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMuseStore } from '@/lib/store';
 import { WriteToolbar } from '@/components/ui/WriteToolbar';
+import ImageUpload from '@/components/ImageUpload';
 
 interface Props { night: boolean; }
 
@@ -19,6 +20,8 @@ export function PageSanctuary({ night }: Props) {
   const { sanctuaryDraft, clearDraft } = useMuseStore();
   const [title, setTitle] = useState('');
   const [mood, setMood] = useState('Reflective');
+  const [coverUrl, setCoverUrl] = useState('');
+  const [showCover, setShowCover] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
@@ -56,7 +59,7 @@ export function PageSanctuary({ night }: Props) {
       const res = await fetch('/api/poems', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: title.trim(), body: html, mood, visibility: 'public' }),
+        body: JSON.stringify({ title: title.trim(), body: html, mood, visibility: 'public', coverImageUrl: coverUrl || null }),
       });
       if (!res.ok) {
         const d = await res.json();
@@ -67,6 +70,8 @@ export function PageSanctuary({ night }: Props) {
         if (editorRef.current) editorRef.current.innerHTML = '';
         setWordCount(0);
         setMood('Reflective');
+        setCoverUrl('');
+        setShowCover(false);
         setTimeout(() => setSaved(false), 3000);
       }
     } catch {
@@ -160,6 +165,20 @@ export function PageSanctuary({ night }: Props) {
         />
       </div>
 
+      {/* Optional cover image */}
+      <AnimatePresence>
+        {showCover && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+            style={{ overflow: 'hidden', borderBottom: `1px solid ${bdCol}` }}
+          >
+            <div style={{ padding: '16px 56px', maxWidth: 480 }}>
+              <ImageUpload endpoint="poemCover" value={coverUrl} onChange={setCoverUrl} aspectRatio="wide" label="Add poem cover image" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Editor area */}
       <div style={{ flex: 1, padding: '32px 56px', position: 'relative' }}>
 
@@ -241,6 +260,10 @@ export function PageSanctuary({ night }: Props) {
           <span style={{ fontSize: 11, color: n ? 'rgba(160,140,200,.5)' : '#bbadd0', fontWeight: 300, letterSpacing: '.06em' }}>
             {wordCount} {wordCount === 1 ? 'word' : 'words'}
           </span>
+          <button onClick={() => setShowCover(v => !v)} style={{ fontSize: 11, color: showCover ? '#c084fc' : ink3, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, padding: 0, fontFamily: "'DM Sans',sans-serif" }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            {showCover ? 'Hide cover' : 'Add cover'}
+          </button>
           {activeMood && (
             <span style={{ fontSize: 11, color: activeMood.color, opacity: .7 }}>
               {activeMood.icon} {activeMood.label}
