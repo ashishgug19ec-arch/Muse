@@ -721,7 +721,7 @@ function CinematicSection({ night }: { night: boolean }) {
           transition={{ duration: 1.2, delay: .1, ease: [.16, 1, .3, 1] }} viewport={{ once: true }}
           className="serif"
           style={{ fontSize: 'clamp(56px, 8.4vw, 132px)', fontWeight: 300, lineHeight: .95, letterSpacing: '-.045em', margin: 0 }}>
-          <span style={{ display: 'block' }}>Write from the</span>
+          <span style={{ display: 'block', color: '#ffffff' }}>Write from the</span>
           <span style={{ display: 'block', fontStyle: 'italic', background: 'linear-gradient(90deg,#7a3a8a 0%,#e89aae 25%,#b89ad8 50%,#e89aae 75%,#7a3a8a 100%)', backgroundSize: '200% 100%', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent', animation: 'shimmer 8s linear infinite' }}>still heart</span>
           <span style={{ display: 'block' }}>of you.</span>
         </motion.h2>
