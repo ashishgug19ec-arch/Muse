@@ -1,4 +1,5 @@
 'use client';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -25,11 +26,19 @@ const GROUPS = [
 ];
 
 export function Drawer() {
-  const { drawerOpen, night, setDrawerOpen, setSignInOpen, nickname } = useMuseStore();
+  const { drawerOpen, night, setDrawerOpen, setSignInOpen, nickname, setNickname } = useMuseStore();
   const { isSignedIn, isLoaded, user } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
   const n = night;
+
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn || nickname !== null) return;
+    fetch('/api/profile/me')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.username) setNickname(data.username); })
+      .catch(() => {});
+  }, [isLoaded, isSignedIn, nickname, setNickname]);
 
   const ink     = n ? '#f6eafd'                    : '#0c0612';
   const mono    = n ? '#b89ad8'                    : '#7a3a8a';

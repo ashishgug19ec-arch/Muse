@@ -6,21 +6,13 @@ import { useMuseStore } from '@/lib/store';
 import { GlassNav } from '@/components/GlassNav';
 
 export function AppShell({ children, title }: { children: React.ReactNode; title: string }) {
-  const { night, nickname, setNickname } = useMuseStore();
+  const { night } = useMuseStore();
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) router.replace('/sign-in');
   }, [isLoaded, isSignedIn, router]);
-
-  useEffect(() => {
-    if (!isLoaded || !isSignedIn || nickname !== null) return;
-    fetch('/api/profile/me')
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.username) setNickname(data.username); })
-      .catch(() => {});
-  }, [isLoaded, isSignedIn, nickname, setNickname]);
 
   if (!isLoaded || !isSignedIn) return null;
 
