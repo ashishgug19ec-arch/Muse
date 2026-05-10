@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '@clerk/nextjs';
+import { useMuseStore } from '@/lib/store';
 
 interface Props { night: boolean; }
 
@@ -13,6 +14,8 @@ const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 
 export function PageSettings({ night }: Props) {
   const { user, isLoaded } = useUser();
+  const { setNickname } = useMuseStore();
+  const [username, setUsername]     = useState('');
   const [bio, setBio]               = useState('');
   const [pronouns, setPronouns]     = useState('');
   const [location, setLocation]     = useState('');
@@ -20,6 +23,7 @@ export function PageSettings({ night }: Props) {
   const [saving, setSaving]         = useState(false);
   const [saved, setSaved]           = useState(false);
   const [loaded, setLoaded]         = useState(false);
+  const [usernameError, setUsernameError] = useState('');
 
   const n = night;
   const ink  = n ? 'rgba(230,220,255,.9)'  : '#1e1628';
@@ -44,6 +48,7 @@ export function PageSettings({ night }: Props) {
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (data) {
+          setUsername(data.username ?? '');
           setBio(data.bio ?? '');
           setPronouns(data.pronouns ?? '');
           setLocation(data.location ?? '');
@@ -55,13 +60,26 @@ export function PageSettings({ night }: Props) {
   }, [isLoaded, loaded]);
 
   async function handleSave() {
+    setUsernameError('');
+    if (username && !/^[a-z0-9_]{3,24}$/.test(username)) {
+      setUsernameError('3–24 chars, lowercase letters, numbers and _ only');
+      return;
+    }
     setSaving(true); setSaved(false);
     try {
-      await fetch('/api/profile', {
+      const res = await fetch('/api/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bio, pronouns, location, whyYouWrite }),
+        body: JSON.stringify({ username: username || undefined, bio, pronouns, location, whyYouWrite }),
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        if (err?.error?.includes('UNIQUE') || res.status === 409) {
+          setUsernameError('That nickname is already taken');
+          return;
+        }
+      }
+      if (username) setNickname(username);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } finally { setSaving(false); }
@@ -113,6 +131,22 @@ export function PageSettings({ night }: Props) {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+            <div>
+              <label style={{ fontSize: 10, letterSpacing: '.08em', textTransform: 'uppercase', color: ink3, display: 'block', marginBottom: 8 }}>Nickname / handle</label>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: ink3, pointerEvents: 'none', fontFamily: "'DM Sans',sans-serif" }}>@</span>
+                <input
+                  value={username}
+                  onChange={e => { setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')); setUsernameError(''); }}
+                  placeholder="your_handle"
+                  maxLength={24}
+                  style={{ ...inputStyle, paddingLeft: 30 }}
+                />
+              </div>
+              {usernameError && <div style={{ fontSize: 11, color: '#f472b6', marginTop: 5, fontFamily: "'DM Sans',sans-serif" }}>{usernameError}</div>}
+              <div style={{ fontSize: 10, color: ink3, marginTop: 5, fontFamily: "'DM Sans',sans-serif" }}>Shows everywhere in place of your name. Lowercase letters, numbers and _ only.</div>
+            </div>
 
             <div>
               <label style={{ fontSize: 10, letterSpacing: '.08em', textTransform: 'uppercase', color: ink3, display: 'block', marginBottom: 8 }}>Bio</label>

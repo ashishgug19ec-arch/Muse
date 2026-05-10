@@ -25,7 +25,7 @@ const GROUPS = [
 ];
 
 export function Drawer() {
-  const { drawerOpen, night, setDrawerOpen, setSignInOpen } = useMuseStore();
+  const { drawerOpen, night, setDrawerOpen, setSignInOpen, nickname } = useMuseStore();
   const { isSignedIn, isLoaded, user } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
@@ -37,9 +37,10 @@ export function Drawer() {
   const iconBg  = n ? 'rgba(184,154,216,.12)'      : 'rgba(122,58,138,.08)';
   const hoverBg = n ? 'rgba(184,154,216,.1)'       : 'rgba(122,58,138,.06)';
 
-  const displayName = user?.firstName
+  const clerkName = user?.firstName
     ? `${user.firstName}${user.lastName ? ' ' + user.lastName : ''}`
     : user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ?? 'poet';
+  const displayName = nickname ?? clerkName;
 
   const PAGE_ROUTES: Record<string, string> = {
     write: '/write',

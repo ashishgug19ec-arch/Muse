@@ -18,7 +18,7 @@ interface GlassNavProps {
 }
 
 export function GlassNav({ scrolled = true, currentPage, showBack }: GlassNavProps) {
-  const { night, toggleNight, setDrawerOpen, setSignInOpen } = useMuseStore();
+  const { night, toggleNight, setDrawerOpen, setSignInOpen, nickname } = useMuseStore();
   const { isSignedIn, isLoaded, user } = useUser();
   const router = useRouter();
 
@@ -117,20 +117,29 @@ export function GlassNav({ scrolled = true, currentPage, showBack }: GlassNavPro
         {isLoaded && isSignedIn ? (
           <motion.button whileHover={{ scale: 1.06 }} whileTap={{ scale: .94 }}
             onClick={() => router.push('/profile')}
-            title="My profile"
+            title={nickname ? `@${nickname}` : 'My profile'}
             style={{
+              display: 'flex', alignItems: 'center', gap: 7,
+              background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0,
+            }}>
+            <div style={{
               width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
               background: user?.imageUrl ? 'transparent' : 'linear-gradient(135deg,#7a3a8a,#e89aae)',
               border: `2px solid ${night ? 'rgba(184,154,216,.4)' : 'rgba(122,58,138,.3)'}`,
-              cursor: 'pointer', overflow: 'hidden',
+              overflow: 'hidden',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               boxShadow: '0 4px 14px rgba(122,58,138,.25)',
-              padding: 0,
             }}>
-            {user?.imageUrl
-              ? <img src={user.imageUrl} alt="profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : <span style={{ fontSize: 12, fontWeight: 600, color: '#fff', letterSpacing: '.02em', fontFamily: "'DM Sans', sans-serif" }}>{initials}</span>
-            }
+              {user?.imageUrl
+                ? <img src={user.imageUrl} alt="profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <span style={{ fontSize: 12, fontWeight: 600, color: '#fff', letterSpacing: '.02em', fontFamily: "'DM Sans', sans-serif" }}>{initials}</span>
+              }
+            </div>
+            {nickname && (
+              <span style={{ fontSize: 11.5, fontWeight: 400, color: night ? 'rgba(220,200,255,.75)' : '#5a3a7a', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap' }}>
+                @{nickname}
+              </span>
+            )}
           </motion.button>
         ) : isLoaded ? (
           <>

@@ -12,6 +12,7 @@ interface DashData {
 }
 
 interface Profile {
+  username: string | null;
   bio: string | null;
   pronouns: string | null;
   location: string | null;
@@ -101,6 +102,9 @@ export function PageAuthorProfile({ night }: Props) {
               </div>
               <div style={{ paddingBottom: 4 }}>
                 <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 400, color: ink, lineHeight: 1.2 }}>{displayName}</div>
+                {profile?.username && (
+                  <div style={{ fontSize: 12, color: '#c084fc', marginTop: 3, fontFamily: "'DM Sans',sans-serif", fontWeight: 500, letterSpacing: '.01em' }}>@{profile.username}</div>
+                )}
                 {profile?.pronouns && <div style={{ fontSize: 11, color: ink3, marginTop: 2 }}>{profile.pronouns}</div>}
               </div>
               <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: .97 }} onClick={() => openPage('Settings')} style={{ marginLeft: 'auto', padding: '8px 18px', borderRadius: 50, border: `1px solid ${cardBd}`, background: 'transparent', color: ink3, fontSize: 11, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
@@ -110,7 +114,7 @@ export function PageAuthorProfile({ night }: Props) {
             </div>
 
             {profile?.bio && (
-              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 14, fontStyle: 'italic', color: ink2, lineHeight: 1.75, marginBottom: 14 }}>{profile.bio}</div>
+              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontStyle: 'italic', color: ink2, lineHeight: 1.8, marginBottom: 14, padding: '12px 0', borderTop: `1px solid ${cardBd}` }}>{profile.bio}</div>
             )}
 
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
