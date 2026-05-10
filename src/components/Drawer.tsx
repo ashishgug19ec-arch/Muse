@@ -83,9 +83,10 @@ export function Drawer() {
             style={{
               position: 'fixed', left: 0, top: 0, bottom: 0, zIndex: 201,
               width: 'min(420px, 90vw)',
-              background: n ? 'rgba(8,4,15,.86)' : 'rgba(255,255,255,.86)',
-              backdropFilter: 'blur(40px) saturate(180%)', WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              borderRight: `1px solid ${bd}`,
+              background: n ? 'rgba(8,4,15,.85)' : 'rgba(255,255,255,.85)',
+              backdropFilter: 'blur(60px) saturate(200%) brightness(1.05)', WebkitBackdropFilter: 'blur(60px) saturate(200%) brightness(1.05)',
+              borderRight: `1px solid ${n ? 'rgba(184,154,216,.25)' : 'rgba(255,255,255,.8)'}`,
+              boxShadow: n ? '4px 0 40px rgba(0,0,0,.4), inset -1px 0 0 rgba(184,154,216,.08), inset 1px 0 0 rgba(255,255,255,.04)' : '4px 0 40px rgba(120,80,180,.08), inset -1px 0 0 rgba(255,255,255,.6)',
               padding: '32px 28px',
               display: 'flex', flexDirection: 'column', gap: 24,
               overflowY: 'auto', color: ink,
