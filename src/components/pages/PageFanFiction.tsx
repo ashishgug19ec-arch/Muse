@@ -205,22 +205,28 @@ export function PageFanFiction({ night, defaultView }: Props) {
               <motion.div key={f.id} variants={fadeUp}
                 onClick={() => openFic(f)}
                 whileHover={{ y: -4, scale: 1.008 }}
-                style={{ borderRadius: 22, border: `1.5px solid ${cardBd}`, background: n ? cardBg : ficBg, backdropFilter: 'blur(20px)', padding: '24px 26px', cursor: 'pointer', position: 'relative', overflow: 'hidden', boxShadow: '0 4px 20px rgba(124,58,237,.06)' }}
+                style={{ borderRadius: 22, border: `1.5px solid ${cardBd}`, background: n ? cardBg : ficBg, backdropFilter: 'blur(20px)', cursor: 'pointer', position: 'relative', overflow: 'hidden', boxShadow: '0 4px 20px rgba(124,58,237,.06)', display: 'flex' }}
               >
-                <div style={{ position: 'absolute', top: -24, right: -24, width: 80, height: 80, background: 'radial-gradient(circle,rgba(192,132,252,.2),transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
-                <div style={{ display: 'flex', gap: 7, alignItems: 'center', marginBottom: 12 }}>
-                  {f.fandom && <span style={{ fontSize: 10, padding: '2px 10px', borderRadius: 50, background: 'rgba(192,132,252,.12)', color: '#c084fc', border: '1px solid rgba(192,132,252,.3)' }}>{f.fandom}</span>}
-                  <span style={{ fontSize: 10, padding: '2px 10px', borderRadius: 50, background: sc.bg, color: sc.text, border: `1px solid ${sc.border}`, textTransform: 'capitalize' }}>{f.status}</span>
-                  <span style={{ fontSize: 10, color: ink3, marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                    {f.chapterCount ?? 0} ch
-                  </span>
-                </div>
-                <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 19, fontWeight: 400, color: ink, marginBottom: 10, lineHeight: 1.3 }}>{f.title}</h3>
-                {f.blurb && <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 12, fontStyle: 'italic', color: ink2, lineHeight: 1.8, marginBottom: 14 }}>"{f.blurb.length > 110 ? f.blurb.slice(0, 110) + '…' : f.blurb}"</p>}
-                <div style={{ fontSize: 10, color: ink3, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                  Updated {new Date(f.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                {/* Cover thumbnail */}
+                {f.coverImageUrl && (
+                  <div style={{ width: 90, flexShrink: 0, background: `url(${f.coverImageUrl}) center/cover no-repeat`, borderRadius: '20px 0 0 20px' }} />
+                )}
+                <div style={{ flex: 1, padding: '22px 22px', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', top: -24, right: -24, width: 80, height: 80, background: 'radial-gradient(circle,rgba(192,132,252,.2),transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+                  <div style={{ display: 'flex', gap: 7, alignItems: 'center', marginBottom: 12 }}>
+                    {f.fandom && <span style={{ fontSize: 10, padding: '2px 10px', borderRadius: 50, background: 'rgba(192,132,252,.12)', color: '#c084fc', border: '1px solid rgba(192,132,252,.3)' }}>{f.fandom}</span>}
+                    <span style={{ fontSize: 10, padding: '2px 10px', borderRadius: 50, background: sc.bg, color: sc.text, border: `1px solid ${sc.border}`, textTransform: 'capitalize' }}>{f.status}</span>
+                    <span style={{ fontSize: 10, color: ink3, marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                      {f.chapterCount ?? 0} ch
+                    </span>
+                  </div>
+                  <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 19, fontWeight: 400, color: ink, marginBottom: 10, lineHeight: 1.3 }}>{f.title}</h3>
+                  {f.blurb && <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 12, fontStyle: 'italic', color: ink2, lineHeight: 1.8, marginBottom: 14 }}>"{f.blurb.length > 110 ? f.blurb.slice(0, 110) + '…' : f.blurb}"</p>}
+                  <div style={{ fontSize: 10, color: ink3, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Updated {new Date(f.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </div>
                 </div>
               </motion.div>
             );
@@ -350,6 +356,9 @@ export function PageFanFiction({ night, defaultView }: Props) {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
             All stories
           </button>
+          {fic?.coverImageUrl && (
+            <div style={{ width: '100%', aspectRatio: '2/3', borderRadius: 12, overflow: 'hidden', marginBottom: 12, background: `url(${fic.coverImageUrl}) center/cover no-repeat`, boxShadow: '0 4px 16px rgba(0,0,0,.2)' }} />
+          )}
           {fic?.fandom && <span style={{ fontSize: 10, padding: '2px 10px', borderRadius: 50, background: 'rgba(192,132,252,.12)', color: '#c084fc', border: '1px solid rgba(192,132,252,.3)', display: 'inline-block', marginBottom: 8 }}>{fic.fandom}</span>}
           <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 400, color: ink, lineHeight: 1.4, marginBottom: 4 }}>{fic?.title}</div>
           {fic?.status && <div style={{ fontSize: 10, color: statusColors[fic.status]?.text ?? ink3, textTransform: 'capitalize', marginBottom: 14 }}>{fic.status}</div>}
